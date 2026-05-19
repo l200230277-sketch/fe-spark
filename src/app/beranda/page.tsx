@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
-  Activity,
   AlertCircle,
   BookOpen,
   Brain,
@@ -17,7 +17,6 @@ import {
   Network,
   Scale,
   Search,
-  Shield,
   ShieldCheck,
   UserRound,
   Users,
@@ -79,7 +78,6 @@ type StatItem = {
   icon: React.ElementType;
 };
 
-type FeatureItem = { icon: React.ElementType; title: string; highlight: string };
 type TechItem = { icon: React.ElementType; title: string; description: string };
 
 // ── Helper: format large numbers ──────────────────────────────────────────────
@@ -97,7 +95,19 @@ function StatCard({ stat, index, active }: { stat: StatItem; index: number; acti
   const Icon = stat.icon;
   return (
     <div
-      className="rounded-2xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+      className="
+        rounded-2xl
+        border
+        bg-white
+        p-6
+        shadow-sm
+        transition-shadow
+        hover:shadow-md
+        flex
+        flex-col
+        items-center
+        text-center
+      "
       style={{
         borderColor: `${sandBeige}66`,
         opacity: active ? 1 : 0,
@@ -113,29 +123,6 @@ function StatCard({ stat, index, active }: { stat: StatItem; index: number; acti
       </p>
       <p className="mt-1 font-semibold text-neutral-800">{stat.label}</p>
       <p className="mt-2 text-sm leading-relaxed text-neutral-500">{stat.description}</p>
-    </div>
-  );
-}
-
-// ── Feature card (float-up) ───────────────────────────────────────────────────
-function FeatureCard({ item, index, active }: { item: FeatureItem; index: number; active: boolean }) {
-  const Icon = item.icon;
-  return (
-    <div
-      className="flex items-center gap-3 px-5 py-4 md:flex-col md:items-start md:py-5 lg:items-center lg:text-center"
-      style={{
-        opacity: active ? 1 : 0,
-        transform: active ? "translateY(0px)" : "translateY(24px)",
-        transition: `opacity 0.5s ease ${index * 0.08}s, transform 0.5s ease ${index * 0.08}s`,
-      }}
-    >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl" style={{ backgroundColor: `${sandBeige}66` }}>
-        <Icon className="h-5 w-5" style={{ color: terracotta }} strokeWidth={1.75} />
-      </div>
-      <div className="text-sm leading-snug">
-        <span className="text-neutral-500">{item.title} </span>
-        <span className="font-semibold text-neutral-900">{item.highlight}</span>
-      </div>
     </div>
   );
 }
@@ -174,7 +161,6 @@ export default function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const { ref: featuresRef, inView: featuresInView } = useInView(0.2);
   const { ref: statsRef, inView: statsInView } = useInView(0.2);
   const { ref: techRef, inView: techInView } = useInView(0.2);
 
@@ -206,14 +192,6 @@ export default function HomePage() {
     { numericValue: 1200000, suffix: "+", label: "Komentar Dianalisis", description: "Dari ribuan postingan publik Instagram.", icon: MessageCircle },
     { numericValue: 50000, suffix: "+", label: "Akun Terdeteksi", description: "Potensi akun yang terlibat dalam aktivitas CIB.", icon: Users },
     { numericValue: 89, suffix: "%", label: "Akurasi Model", description: "Model AI kami dilatih dengan data berkualitas tinggi.", icon: Crosshair },
-    { numericValue: 24, suffix: "/7", label: "Monitoring Cerdas", description: "Sistem bekerja tanpa henti melindungi ruang diskusi.", icon: ShieldCheck },
-  ];
-
-  const features: FeatureItem[] = [
-    { icon: Shield, title: "Dibangun untuk", highlight: "Ruang Digital yang Sehat" },
-    { icon: BookOpen, title: "Berbasis", highlight: "Riset & Akademik" },
-    { icon: Scale, title: "Transparan &", highlight: "Akuntabel" },
-    { icon: UserRound, title: "Privasi Pengguna", highlight: "Diutamakan" },
   ];
 
   const techSteps: TechItem[] = [
@@ -230,54 +208,103 @@ export default function HomePage() {
       <section
         className="relative overflow-hidden"
         style={{
-          background: `
-            linear-gradient(
-              135deg,
-              #8F2F2F 0%,
-              #A54141 16%,
-              #B85C4B 34%,
-              #C4876B 52%,
-              #D9B89C 68%,
-              #E7D8BE 84%,
-              #F5F0DC 100%
-            )`,
-        }}
-      >
-        <div className="pointer-events-none absolute bottom-0 right-0 h-full w-1/2"
-          style={{ background: `
+          backgroundColor: "#F6EBDD",
+          backgroundImage: `
             radial-gradient(
-              ellipse 85% 75% at 100% 55%,
-              rgba(255,248,235,0.95) 0%,
-              rgba(245,240,220,0.72) 38%,
-              rgba(231,228,190,0.28) 58%,
-              transparent 78%
-            )`, }} />
-        <div className="pointer-events-none absolute inset-0 opacity-[0.08]"
+              circle at top left,
+              rgba(176, 73, 66, 0.95) 0%,
+              rgba(196, 110, 92, 0.72) 18%,
+              rgba(223, 170, 145, 0.38) 32%,
+              rgba(246, 235, 221, 0) 52%
+            )
+          `,
+        }} >
+        <div className="pointer-events-none absolute bottom-0 right-0 h-full w-1/2"
+          style={{
+            background: `
+              radial-gradient(
+                ellipse 95% 85% at 100% 50%,
+                rgba(255,250,242,0.98) 0%,
+                rgba(248,240,228,0.92) 38%,
+                rgba(245,235,220,0.55) 58%,
+                transparent 78%
+              )
+            `,
+          }} />
+        <div className="pointer-events-none absolute inset-0 opacity-[0.035]"
           style={{ backgroundImage: `radial-gradient(circle, #fff 1px, transparent 1px)`, backgroundSize: "32px 32px" }} />
 
         <div className="relative mx-auto max-w-6xl px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-32">
-          <div className="grid items-center gap-10 lg:grid-cols-[1fr_minmax(0,460px)]">
+          <div className="grid items-center gap-6 lg:grid-cols-[1.4fr_0.6fr]">
 
             {/* Left copy */}
-            <div>
+            <div className="max-w-[900px] pt-2">
               <div
-                className="mb-6 inline-flex items-center gap-2 rounded-full border px-4 py-1.5"
-                style={{ borderColor: "rgba(255,255,255,0.35)", backgroundColor: "rgba(255,255,255,0.18)", backdropFilter: "blur(8px)" }}
+                className="mb-6 inline-flex items-center gap-2 rounded-full border px-5 py-2 shadow-sm"
+                style={{
+                  borderColor: "rgba(255,255,255,0.18)",
+                  background: `
+                    linear-gradient(
+                      135deg,
+                      rgba(196,80,74,0.95) 0%,
+                      rgba(165,65,65,0.88) 100%
+                    )
+                  `,
+                  boxShadow: "0 6px 18px rgba(165,65,65,0.18)",
+                  backdropFilter: "blur(10px)",
+                }}
               >
-                <Shield className="h-3.5 w-3.5 text-white/90" strokeWidth={2} />
-                <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/90">
+                <span
+                  className="
+                    text-[8px]
+                    tracking-[0.16em]
+                    font-bold
+                    uppercase
+                    text-[#FFF4EC]
+
+                    sm:text-[9px]
+                    md:text-[10px]
+                    md:tracking-[0.22em]
+                  "
+                >
                   AI-Powered · Ethical · Trusted
                 </span>
               </div>
-              <h1 className="text-4xl font-extrabold leading-[1.12] tracking-tight text-white md:text-5xl lg:text-[3.2rem]">
+              <h1
+                className="
+                  max-w-[780px]
+                  text-[1.9rem]
+                  leading-[1.02]
+                  font-bold
+                  tracking-[-0.04em]
+                  text-[#2A1715]
+                  sm:text-[2.6rem]
+                  md:text-[3.4rem]
+                  lg:text-[4.2rem]
+                "
+              >
                 Lindungi Ruang Digital
                 <br />
-                <span className="text-white/80">dari Manipulasi Opini</span>
+                dari{" "}
+                <span className="text-[#C85245]">
+                  Manipulasi Opini
+                </span>
               </h1>
-              <p className="mt-5 max-w-[520px] text-sm leading-relaxed text-white/75 md:text-[15px]">
-                CIB Detector menggunakan kecerdasan buatan dan analisis temporal untuk mendeteksi
-                aktivitas Coordinated Inauthentic Behavior (CIB) pada komentar Instagram secara
-                akurat dan bertanggung jawab.
+              <p
+                className="
+                  mt-5
+                  max-w-[620px]
+                  text-[13px]
+                  leading-[1.7]
+                  text-[#5F4A45]
+                  sm:text-[14px]
+                  md:text-[16px]
+                  lg:text-[18px]
+                "
+              >
+                CIB Detector menggunakan kecerdasan buatan dan analisis temporal
+                untuk mendeteksi aktivitas Coordinated Inauthentic Behavior (CIB)
+                pada komentar Instagram secara akurat dan bertanggung jawab.
               </p>
             </div>
 
@@ -312,7 +339,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Bubble bottom-right */}
-                <div className="absolute bottom-10 right-0 flex items-center gap-2 rounded-xl border bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm"
+                <div className="absolute bottom-20 right-0 flex items-center gap-2 rounded-xl border bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm"
                   style={{ borderColor: `${sandBeige}88` }}>
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${sandBeige}99` }}>
                     <UserRound className="h-4 w-4" style={{ color: warmClay }} />
@@ -325,30 +352,79 @@ export default function HomePage() {
 
                 {/* Center shield */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="absolute bottom-12 h-16 w-36 rounded-full opacity-30 blur-xl" style={{ background: terracotta }} />
                   <div
-                    className="relative flex h-44 w-44 items-center justify-center rounded-[2.5rem] shadow-2xl md:h-52 md:w-52"
+                    className="absolute bottom-12 h-20 w-40 rounded-full opacity-40 blur-2xl"
                     style={{
-                      background: `linear-gradient(145deg, #C4504A 0%, ${terracotta} 40%, #8a3030 100%)`,
-                      boxShadow: `0 20px 60px rgba(165,65,65,0.45), 0 4px 20px rgba(165,65,65,0.3), inset 0 1px 0 rgba(255,255,255,0.15)`,
+                      background: "rgba(165,65,65,0.55)",
+                    }}
+                  />
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{
+                      filter: "drop-shadow(0 20px 45px rgba(165,65,65,0.35))",
                     }}
                   >
-                    <div className="absolute inset-0 rounded-[2.5rem] opacity-30"
-                      style={{ background: `linear-gradient(135deg, rgba(255,255,255,0.4) 0%, transparent 50%)` }} />
-                    <Shield className="relative z-10 h-20 w-20 text-white/95 md:h-24 md:w-24" strokeWidth={1.25} />
-                    <Activity className="absolute bottom-10 z-10 h-10 w-10 text-white md:bottom-12 md:h-12 md:w-12" strokeWidth={2} />
+                    <Image
+                      src="/logo.png"
+                      alt="CIB Detector Logo"
+                      width={198}
+                      height={198}
+                      className="object-contain"
+                      priority
+                    />
                   </div>
                 </div>
 
                 {/* Dots */}
                 {[
-                  { top: "38%", left: "4%", size: 6, opacity: 0.5 },
-                  { top: "55%", left: "10%", size: 4, opacity: 0.35 },
-                  { top: "25%", right: "6%", size: 5, opacity: 0.4 },
-                  { bottom: "30%", right: "12%", size: 7, opacity: 0.3 },
+                  { top: "12%", left: "8%", size: 4, opacity: 0.25 },
+                  { top: "18%", left: "20%", size: 6, opacity: 0.4 },
+                  { top: "28%", left: "5%", size: 5, opacity: 0.35 },
+
+                  { top: "14%", right: "12%", size: 7, opacity: 0.3 },
+                  { top: "26%", right: "4%", size: 5, opacity: 0.45 },
+                  { top: "36%", right: "14%", size: 4, opacity: 0.25 },
+
+                  { top: "44%", left: "2%", size: 6, opacity: 0.35 },
+                  { top: "52%", left: "12%", size: 3, opacity: 0.2 },
+                  { top: "60%", left: "6%", size: 5, opacity: 0.3 },
+
+                  { top: "48%", right: "2%", size: 6, opacity: 0.4 },
+                  { top: "58%", right: "10%", size: 4, opacity: 0.25 },
+                  { top: "68%", right: "6%", size: 7, opacity: 0.35 },
+
+                  { bottom: "18%", left: "18%", size: 5, opacity: 0.25 },
+                  { bottom: "10%", left: "30%", size: 8, opacity: 0.2 },
+                  { bottom: "22%", left: "42%", size: 4, opacity: 0.35 },
+
+                  { bottom: "14%", right: "18%", size: 5, opacity: 0.3 },
+                  { bottom: "8%", right: "30%", size: 3, opacity: 0.2 },
+                  { bottom: "20%", right: "40%", size: 6, opacity: 0.4 },
+
+                  { top: "40%", left: "26%", size: 3, opacity: 0.25 },
+                  { top: "34%", right: "28%", size: 5, opacity: 0.3 },
+                  { bottom: "34%", left: "24%", size: 7, opacity: 0.2 },
+                  { bottom: "30%", right: "22%", size: 4, opacity: 0.35 },
                 ].map((dot, i) => (
-                  <div key={i} className="absolute rounded-full"
-                    style={{ ...dot, width: dot.size, height: dot.size, backgroundColor: terracotta, opacity: dot.opacity }} />
+                  <div
+                    key={i}
+                    className="absolute rounded-full"
+                    style={{
+                      ...dot,
+                      width: dot.size,
+                      height: dot.size,
+                      background: `
+                        radial-gradient(
+                          circle,
+                          rgba(165,65,65,0.9) 0%,
+                          rgba(196,135,107,0.7) 60%,
+                          transparent 100%
+                        )
+                      `,
+                      opacity: dot.opacity,
+                      filter: "blur(0.3px)",
+                    }}
+                  />
                 ))}
               </div>
             </div>
@@ -373,7 +449,6 @@ export default function HomePage() {
                 />
               </div>
               <div className="flex shrink-0 items-center gap-2 sm:pr-0.5">
-                <Shield className="hidden h-5 w-5 sm:block" style={{ color: terracotta }} />
                 <button
                   type="button"
                   onClick={handleAnalysis}
@@ -395,40 +470,193 @@ export default function HomePage() {
                 <p style={{ color: "#6b2a2a" }}>{error}</p>
               </div>
             )}
-            <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-white/75 md:text-sm">
-              <ShieldCheck className="h-4 w-4 text-emerald-300" />
+            <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-[#5F4A45] md:text-sm">
+              <ShieldCheck className="h-4 w-4 text-[#9E3D3D]" />
               Aman, Privat, dan Tidak Menyimpan Data Komentar Anda.
             </p>
           </div>
 
-          {/* ── ANIMASI 1: Feature bar — float-up saat scroll ── */}
-          <div
-            ref={featuresRef}
-            className="mx-auto mt-10 grid max-w-5xl grid-cols-2 divide-x divide-y rounded-2xl border bg-white/80 shadow-md backdrop-blur-sm md:grid-cols-4 md:divide-y-0"
-            style={{ borderColor: sandBeige }}
-          >
-            {features.map((item, i) => (
-              <FeatureCard key={i} item={item} index={i} active={featuresInView} />
-            ))}
+          {/* ── Feature bar ───────────────────────────────────── */}
+            <div
+              className="
+                mx-auto
+                mt-10
+
+                flex
+                flex-col
+                gap-6
+
+                max-w-5xl
+
+                rounded-[26px]
+                border
+                bg-white/75
+
+                px-6
+                py-6
+
+                shadow-md
+                backdrop-blur-sm
+
+                md:flex-row
+                md:items-center
+                md:justify-between
+                md:px-10
+                md:py-7
+              "
+              style={{
+                borderColor: "rgba(217,196,157,0.45)",
+              }}
+            >
+
+              {/* Item utama */}
+              <div className="flex items-center gap-4 md:min-w-[320px]">
+                <div
+                  className="flex h-14 w-14 items-center justify-center rounded-2xl"
+                  style={{
+                    background: "rgba(217,196,157,0.28)",
+                  }}
+                >
+                  <Image
+                    src="/logo.png"
+                    alt="Logo"
+                    width={32}
+                    height={32}
+                    className="object-contain"
+                  />
+                </div>
+
+                <div className="leading-snug">
+                  <p className="text-[15px] text-[#7A6A63]">
+                    Dibangun untuk
+                  </p>
+
+                  <p className="text-[18px] font-semibold text-[#4A2D29]">
+                    Ruang Digital yang Sehat
+                  </p>
+                </div>
+              </div>
+
+              {/* MOBILE: layout segitiga */}
+              <div className="mt-2 grid grid-cols-2 gap-y-6 md:hidden">
+
+                {/* Item 1 */}
+                <div className="flex flex-col items-center text-center">
+                  <BookOpen className="h-5 w-5 text-[#B84E43]" />
+
+                  <p className="mt-2 text-[13px] leading-snug text-[#7A6A63]">
+                    Berbasis Riset <br />
+                    & Akademik
+                  </p>
+                </div>
+
+                {/* Item 2 */}
+                <div className="flex flex-col items-center text-center">
+                  <Scale className="h-5 w-5 text-[#B84E43]" />
+
+                  <p className="mt-2 text-[13px] leading-snug text-[#7A6A63]">
+                    Transparan <br />
+                    & Akuntabel
+                  </p>
+                </div>
+
+                {/* Item 3 */}
+                <div className="col-span-2 flex flex-col items-center text-center">
+                  <UserRound className="h-5 w-5 text-[#B84E43]" />
+
+                  <p className="mt-2 text-[13px] leading-snug text-[#7A6A63]">
+                    Privasi Pengguna <br />
+                    Diutamakan
+                  </p>
+                </div>
+              </div>
+
+              {/* DESKTOP: layout horizontal */}
+              <div className="hidden md:flex md:items-center md:gap-10">
+
+                <div className="flex items-center gap-3">
+                  <BookOpen className="h-5 w-5 text-[#B84E43]" />
+
+                  <div className="leading-snug">
+                    <p className="text-[14px] text-[#7A6A63]">
+                      Berbasis Riset <br />
+                      & Akademik
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <Scale className="h-5 w-5 text-[#B84E43]" />
+
+                  <div className="leading-snug">
+                    <p className="text-[14px] text-[#7A6A63]">
+                      Transparan <br />
+                      & Akuntabel
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <UserRound className="h-5 w-5 text-[#B84E43]" />
+
+                  <div className="leading-snug">
+                    <p className="text-[14px] text-[#7A6A63]">
+                      Privasi Pengguna <br />
+                      Diutamakan
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
           </div>
-        </div>
       </section>
 
       {/* ── DAMPAK NYATA — ANIMASI 2: float-up + count-up ────── */}
-      <section className="border-t py-16 md:py-24" style={{ backgroundColor: softIvory, borderColor: `${sandBeige}77` }}>
+      <section className="border-t py-12 md:py-24" style={{ backgroundColor: softIvory, borderColor: `${sandBeige}77` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
-          <p className="text-center text-[11px] font-bold uppercase tracking-[0.28em] md:text-xs" style={{ color: terracotta }}>
+          <p
+            className="text-center font-bold uppercase text-[10px] tracking-[0.18em] sm:text-[11px] md:text-base md:tracking-[0.28em]" style={{ color: terracotta }}>
             Dampak Nyata
           </p>
-          <h2 className="mx-auto mt-3 max-w-xl text-center text-2xl font-bold text-neutral-900 md:text-3xl lg:text-4xl">
-            Angka yang{" "}
-            <span className="relative inline-block">
-              Mencerminkan
-              <span className="absolute -bottom-1 left-1/2 h-1 w-24 -translate-x-1/2 rounded-full" style={{ backgroundColor: terracotta }} />
+          <h2 className="mt-3 text-center text-[1.1rem] font-bold leading-[1.25] text-neutral-900 sm:text-[1.4rem] md:text-[2rem] lg:text-4xl">
+            <span className="whitespace-nowrap">
+              Angka yang
             </span>{" "}
-            Kepercayaan
+
+            <span className="relative inline-block whitespace-nowrap">
+              Mencerminkan
+              <span
+                className="
+                  absolute
+                  -bottom-1
+                  left-1/2
+                  h-1
+                  w-16
+                  -translate-x-1/2
+                  rounded-full
+                  md:w-24
+                "
+                style={{ backgroundColor: terracotta }}
+              />
+            </span>{" "}
+
+            <span className="whitespace-nowrap">
+              Kepercayaan
+            </span>
           </h2>
-          <div ref={statsRef} className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          <div
+            ref={statsRef}
+            className="
+              mt-14
+              grid
+              gap-5
+              sm:grid-cols-2
+              lg:grid-cols-3
+              max-w-5xl
+              mx-auto
+            "
+          >
             {stats.map((stat, i) => (
               <StatCard key={i} stat={stat} index={i} active={statsInView} />
             ))}

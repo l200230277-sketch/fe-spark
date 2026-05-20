@@ -640,7 +640,7 @@ export default function HomePage() {
               and temporal patterns to intelligently identify opinion manipulation.
             </p>
             <Link
-              href="/tentang"
+              href="/about"
               className="mt-6 inline-flex items-center gap-1.5 rounded-xl border-2 px-5 py-2.5 text-[13px] font-semibold transition hover:bg-white/50 md:mt-8 md:px-6 md:py-3 md:text-sm"
               style={{ borderColor: terracotta, color: terracotta }}
             >

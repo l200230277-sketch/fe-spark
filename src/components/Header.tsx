@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -12,7 +13,7 @@ const sandBeige = "#D9C49D";
 export default function Header() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const isFloatingNav = pathname === "/beranda" || pathname === "/tentang";
+  const isFloatingNav = pathname === "/beranda" || pathname === "/tentang" || pathname === "/dashboard";
   const navTagline =
     pathname === "/tentang"
       ? "Digital Trust Intelligence"
@@ -40,16 +41,13 @@ export default function Header() {
             href="/beranda"
             className="flex min-w-0 items-center gap-2.5 transition-opacity hover:opacity-85 md:gap-3"
           >
-            <div
-              className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-md md:h-11 md:w-11"
-              style={{
-                background: `linear-gradient(145deg, ${terracotta}, ${warmClay})`,
-              }}
-            >
-              <Shield className="h-5 w-5 text-white md:h-[1.35rem] md:w-[1.35rem]" strokeWidth={1.75} />
-              <Activity
-                className="absolute bottom-1.5 h-3.5 w-3.5 text-white/95 md:bottom-2 md:h-4 md:w-4"
-                strokeWidth={2.5}
+            <div className="relative h-10 w-10 shrink-0 md:h-11 md:w-11">
+              <Image
+                src="/logo.png"
+                alt="CIB Detector Logo"
+                fill
+                className="object-contain"
+                priority
               />
             </div>
             <div className="min-w-0 leading-tight">
@@ -63,7 +61,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Nav */}
-          <div className="hidden items-center gap-8 md:flex">
+          <div className="ml-auto hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
               <Link
                 key={item.href}

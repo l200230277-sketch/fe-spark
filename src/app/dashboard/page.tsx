@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   AreaChart,
@@ -10,10 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
 } from "recharts";
 import {
   MessageCircle,
@@ -24,10 +20,7 @@ import {
   BarChart3,
   Network,
   Search,
-  Filter,
   Loader2,
-  ArrowLeft,
-  TrendingUp,
   Users,
   ChevronDown,
   ChevronUp,
@@ -35,23 +28,340 @@ import {
   Activity,
   Lightbulb,
 } from "lucide-react";
-import {
-  AnalysisResult,
-  ClusterSummary,
-  SuspiciousAccount,
-} from "@/services/api";
-import GaugeChart from "@/components/GaugeChart";
-import NetworkGraph from "@/components/NetworkGraph";
 
-const normalizeSpamLabel = (
-  label?: string,
-): "spam" | "suspicious" | "normal" => {
-  const v = String(label || "")
-    .trim()
-    .toLowerCase();
+interface AnalysisResult {
+  post_id?: string;
+  url?: string;
+  cib_score: number;
+  semantic_similarity: number;
+  temporal_anomaly: number;
+  comments_count: number;
+  comments_cleaned_count: number;
+  temporal_insight?: { message: string };
+  temporal_analysis: Array<{ tanggal: string; jumlah_komentar: number }>;
+  suspicious_accounts: Array<{
+    username: string;
+    risk_score: "High" | "Medium" | "Low";
+    cluster_behavior: string;
+    comment_count: number;
+    pattern: string;
+  }>;
+  cluster_summaries: Array<{
+    cluster_id: number;
+    spam_label: string;
+    summary: string;
+    stats: {
+      jumlah_data: number;
+      spam_score: number;
+      unique_ratio: number;
+      repetition_score: number;
+      avg_comment_length: number;
+    };
+    comments: Array<{ username: string; tanggal: string; komentar: string }>;
+  }>;
+}
+
+const NetworkBackground = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resizeCanvas = () => {
+      canvas.width = canvas.parentElement?.offsetWidth || 0;
+      canvas.height = canvas.parentElement?.offsetHeight || 0;
+      drawNetwork();
+    };
+
+    const drawNetwork = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const numPoints = 28; 
+      const points: Array<{ x: number; y: number; radius: number }> = [];
+      
+      let seed = 88;
+      const random = () => {
+        let x = Math.sin(seed++) * 10000;
+        return x - Math.floor(x);
+      };
+
+      for (let i = 0; i < numPoints; i++) {
+        const x = canvas.width * 0.55 + random() * (canvas.width * 0.45);
+        const progressX = (x - canvas.width * 0.55) / (canvas.width * 0.45);
+        const minY = canvas.height * (1 - progressX) * 0.55;
+        const y = minY + random() * (canvas.height - minY);
+
+        points.push({
+          x,
+          y,
+          radius: random() * 2 + 1.5,
+        });
+      }
+
+      ctx.lineWidth = 0.6;
+      for (let i = 0; i < points.length; i++) {
+        for (let j = i + 1; j < points.length; j++) {
+          const dist = Math.hypot(points[i].x - points[j].x, points[i].y - points[j].y);
+
+          if (dist < canvas.width * 0.18) {
+            ctx.strokeStyle = `rgba(255, 255, 255, ${0.18 - dist / (canvas.width * 0.18) * 0.18})`;
+            ctx.beginPath();
+            ctx.moveTo(points[i].x, points[i].y);
+            ctx.lineTo(points[j].x, points[j].y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      points.forEach((point) => {
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+        ctx.fill();
+      });
+    };
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    return () => window.removeEventListener("resize", resizeCanvas);
+  }, []);
+
+  return <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />;
+};
+
+const GaugeChart = ({ value, label }: { value: number; label: string }) => {
+  const radius = 55;
+  const circumference = 2 * Math.PI * radius;
+  const strokeDashoffset = circumference - (value / 100) * circumference;
+
+  return (
+    <div className="flex flex-col items-center justify-center p-4">
+      <div className="relative flex items-center justify-center w-40 h-40">
+        <svg className="w-full h-full transform -rotate-90">
+          <circle
+            cx="80"
+            cy="80"
+            r={radius}
+            stroke="#D9C49D"
+            strokeWidth="14"
+            fill="transparent"
+            className="opacity-40"
+          />
+          <circle
+            cx="80"
+            cy="80"
+            r={radius}
+            stroke="#A54141"
+            strokeWidth="14"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            strokeLinecap="round"
+            fill="transparent"
+            className="transition-all duration-500"
+          />
+        </svg>
+        <div className="absolute text-center">
+          <span className="text-3xl font-extrabold text-stone-800">{value}%</span>
+        </div>
+      </div>
+      <div className="mt-5 text-center">
+        <span className="text-base px-4 py-1.5 bg-[#A54141]/10 text-[#A54141] rounded-full font-bold">
+          Moderate Risk
+        </span>
+        <p className="text-base text-stone-500 mt-4 max-w-[220px] leading-relaxed">{label}</p>
+      </div>
+    </div>
+  );
+};
+
+const NetworkGraph = ({
+  clusters,
+}: {
+  clusters: any[];
+}) => {
+  const clusterConfigs = [
+  {
+    label: "Cluster A",
+    color: "#A9471F",
+    count: 29,
+    center: { x: 130, y: 110 },
+  },
+  {
+    label: "Cluster B",
+    color: "#FF6B81",
+    count: 28,
+    center: { x: 375, y: 90 },
+  },
+  {
+    label: "Cluster C",
+    color: "#E39B11",
+    count: 27,
+    center: { x: 70, y: 285 },
+  },
+  {
+    label: "Cluster D",
+    color: "#FFAE1A",
+    count: 23,
+    center: { x: 235, y: 320 },
+  },
+  {
+    label: "Cluster E",
+    color: "#DCC29E",
+    count: 17,
+    center: { x: 385, y: 270 },
+  },
+];
+
+  const generateNodes = (
+    centerX: number,
+    centerY: number,
+    total: number
+  ) => {
+    return Array.from({ length: total }).map((_, i) => {
+      const angle = (Math.PI * 2 * i) / total;
+
+      const radius = 38 + Math.random() * 58;
+
+      return {
+        x: centerX + Math.cos(angle) * radius,
+        y: centerY + Math.sin(angle) * radius,
+      };
+    });
+  };
+
+  return (
+    <div className="rounded-2xl border border-[#E7D7C9] bg-gradient-to-b from-white to-[#FFF8F4] p-6 shadow-sm overflow-hidden">
+      <div className="flex flex-col lg:flex-row gap-8 items-center">
+
+        <div className="flex-1 w-full">
+          <svg
+            viewBox="0 0 470 370"
+            className="w-full h-[390px]"
+          >
+            {clusterConfigs.map((cluster, idx) =>
+              clusterConfigs.slice(idx + 1).map((other, j) => (
+                <line
+                  key={`${idx}-${j}`}
+                  x1={cluster.center.x}
+                  y1={cluster.center.y}
+                  x2={other.center.x}
+                  y2={other.center.y}
+                  stroke="#EAD8CC"
+                  strokeWidth="1"
+                  opacity="0.4"
+                />
+              ))
+            )}
+            {clusterConfigs.map((cluster, idx) => {
+              const nodes = generateNodes(
+                cluster.center.x,
+                cluster.center.y,
+                cluster.count
+              );
+
+              return (
+                <g key={idx}>
+                  <circle
+                    cx={cluster.center.x}
+                    cy={cluster.center.y}
+                    r="20"
+                    fill={cluster.color}
+                    opacity="0.18"
+                  />
+                  {nodes.map((node, i) => (
+                    <line
+                      key={i}
+                      x1={cluster.center.x}
+                      y1={cluster.center.y}
+                      x2={node.x}
+                      y2={node.y}
+                      stroke={cluster.color}
+                      strokeOpacity="0.22"
+                      strokeWidth="1.4"
+                    />
+                  ))}
+
+                  {nodes.map((a, i) =>
+                    nodes.slice(i + 1, i + 5).map((b, j) => (
+                      <line
+                        key={`${i}-${j}`}
+                        x1={a.x}
+                        y1={a.y}
+                        x2={b.x}
+                        y2={b.y}
+                        stroke={cluster.color}
+                        strokeOpacity="0.12"
+                        strokeWidth="1"
+                      />
+                    ))
+                  )}
+
+                  <circle
+                    cx={cluster.center.x}
+                    cy={cluster.center.y}
+                    r="13"
+                    fill={cluster.color}
+                    className="drop-shadow-lg"
+                  />
+
+                  {nodes.map((node, i) => (
+                    <circle
+                      key={i}
+                      cx={node.x}
+                      cy={node.y}
+                      r={Math.random() > 0.7 ? 6.5 : 5}
+                      fill={cluster.color}
+                      opacity="0.95"
+                    />
+                  ))}
+                </g>
+              );
+            })}
+          </svg>
+        </div>
+
+        <div className="w-full lg:w-[210px] space-y-5">
+          {clusterConfigs.map((cluster, idx) => (
+            <div
+              key={idx}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-4 h-4 rounded-full"
+                  style={{
+                    backgroundColor: cluster.color,
+                  }}
+                />
+
+                <span className="font-semibold text-stone-700">
+                  {cluster.label}
+                </span>
+              </div>
+
+              <span className="text-sm text-stone-400 font-medium">
+                {cluster.count} account
+              </span>
+            </div>
+          ))}
+
+          <button className="w-full mt-6 border border-[#D7A98C] text-[#9A4B3B] font-semibold rounded-xl py-3 hover:bg-[#FFF4EC] transition-all duration-300">
+            View Cluster Details →
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const normalizeSpamLabel = (label?: string): "spam" | "suspicious" | "normal" => {
+  const v = String(label || "").trim().toLowerCase();
   if (v.includes("spam")) return "spam";
-  if (v.includes("suspicious") || v.includes("mencurigakan"))
-    return "suspicious";
+  if (v.includes("suspicious") || v.includes("mencurigakan")) return "suspicious";
   return "normal";
 };
 
@@ -62,8 +372,91 @@ const spamLabelDisplay = (label?: string): string => {
   return "NORMAL";
 };
 
+const MOCK_DATA: AnalysisResult = {
+  post_id: "12345",
+  url: "https://instagram.com/p/DX1ZPxVkxZh/",
+  cib_score: 46,
+  semantic_similarity: 0.82,
+  temporal_anomaly: 0.65,
+  comments_count: 556,
+  comments_cleaned_count: 525,
+  temporal_insight: {
+    message: "An unusual spike in comment activity was detected within the analysis period. This pattern indicates a coordinated movement.",
+  },
+  temporal_analysis: [
+    { tanggal: "3 Mei", jumlah_komentar: 0 },
+    { tanggal: "5 Mei", jumlah_komentar: 1.0 },
+    { tanggal: "8 Mei", jumlah_komentar: 0 },
+    { tanggal: "12 Mei", jumlah_komentar: 2.0 },
+  ],
+  suspicious_accounts: [
+    {
+      username: "yafiimuhhammad",
+      risk_score: "High",
+      cluster_behavior: "Coordinated Inauthentic Behavior",
+      comment_count: 1,
+      pattern: "Frequency of repeates comments",
+    },
+    {
+      username: "veinsby_bosshub",
+      risk_score: "Low",
+      cluster_behavior: "Normal behaviour",
+      comment_count: 2,
+      pattern: "Suspicious comment pattern",
+    },
+    {
+      username: "fynol_a",
+      risk_score: "Low",
+      cluster_behavior: "Normal behaviour",
+      comment_count: 2,
+      pattern: "Suspicious comment pattern",
+    },
+  ],
+cluster_summaries: [
+  {
+    cluster_id: 2,
+    spam_label: "normal",
+    summary: "The pattern of comments is dominated by: wajiibbb, bener, poko, nih, aja",
+    stats: {
+      jumlah_data: 25,
+      spam_score: 0.114,
+      unique_ratio: 1.0,
+      repetition_score: 0.0,
+      avg_comment_length: 34,
+    },
+    comments: [
+      {
+        username: "user_1",
+        tanggal: "14:02",
+        komentar: "wajiibbb dicoba ini mah beneran bagus",
+      },
+    ],
+  },
+
+  {
+    cluster_id: 3,
+    spam_label: "normal",
+    summary: "Dominant comments: mantap, gas, keren",
+    stats: {
+      jumlah_data: 18,
+      spam_score: 0.09,
+      unique_ratio: 0.92,
+      repetition_score: 0.1,
+      avg_comment_length: 22,
+    },
+    comments: [
+      {
+        username: "user_2",
+        tanggal: "15:20",
+        komentar: "mantap banget ini serius",
+      },
+    ],
+  },
+],
+};
+
+
 export default function DashboardPage() {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<number | null>(null);
@@ -79,49 +472,15 @@ export default function DashboardPage() {
     try {
       const cached = localStorage.getItem("latest_analysis");
       if (cached) {
-        const data: AnalysisResult = JSON.parse(cached);
-        setResult(data);
+        setResult(JSON.parse(cached));
       } else {
-        router.push("/beranda");
+        setResult(MOCK_DATA);
       }
     } catch (error) {
-      console.error("Error loading analysis:", error);
-      router.push("/beranda");
+      setResult(MOCK_DATA);
     } finally {
       setLoading(false);
     }
-  };
-
-  const downloadCSV = () => {
-    if (!result) return;
-
-    const csvRows = [
-      [
-        "Username",
-        "Risk Score",
-        "Cluster Behavior",
-        "Komentar",
-        "Pattern Terdeteksi",
-      ],
-    ];
-
-    result.suspicious_accounts?.forEach((account) => {
-      csvRows.push([
-        account.username,
-        account.risk_score,
-        account.cluster_behavior,
-        account.comment_count.toString(),
-        `"${account.pattern.replace(/"/g, '""')}"`,
-      ]);
-    });
-
-    const csvContent = csvRows.map((row) => row.join(",")).join("\n");
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `suspicious-accounts-${result?.post_id || "unknown"}.csv`;
-    a.click();
   };
 
   const filteredClusters =
@@ -129,427 +488,457 @@ export default function DashboardPage() {
       const matchesSearch =
         cluster.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
         cluster.cluster_id.toString().includes(searchTerm);
-
       const matchesFilter =
-        filterLabel === "all" ||
-        normalizeSpamLabel(cluster.spam_label) === filterLabel;
-
+        filterLabel === "all" || normalizeSpamLabel(cluster.spam_label) === filterLabel;
       return matchesSearch && matchesFilter;
     }) || [];
 
   const filteredAccounts =
     result?.suspicious_accounts?.filter((account) => {
-      const matchesSearch = account.username
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const keyword = searchTerm.toLowerCase();
+
+      const matchesSearch =
+        account.username.toLowerCase().includes(keyword) ||
+        account.risk_score.toLowerCase().includes(keyword) ||
+        account.cluster_behavior.toLowerCase().includes(keyword) ||
+        account.pattern.toLowerCase().includes(keyword) ||
+        account.comment_count.toString().includes(keyword);
+
       const matchesFilter =
-        accountFilter === "all" || account.risk_score === accountFilter;
+        accountFilter === "all" ||
+        account.risk_score.toLowerCase() === accountFilter.toLowerCase();
+
       return matchesSearch && matchesFilter;
     }) || [];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Memuat hasil analisis...</p>
+          <Loader2 className="w-14 h-14 animate-spin text-[#A54141] mx-auto mb-4" />
+          <p className="text-stone-600 font-bold text-lg">Loading analysis results..</p>
         </div>
       </div>
     );
   }
 
-  if (!result) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">Tidak ada data analisis</p>
-          <button
-            onClick={() => router.push("/beranda")}
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Kembali ke Beranda
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (!result) return null;
 
   const cibScore = result?.cib_score ?? 0;
   const semanticSimilarity = (result?.semantic_similarity ?? 0) * 100;
   const temporalAnomaly = (result?.temporal_anomaly ?? 0) * 100;
+  const behavioralCoordination = result?.cib_score ?? 0;
+  const spamClusters = result?.cluster_summaries?.filter((c) => normalizeSpamLabel(c.spam_label) === "spam").length || 0;
+  const clusterData = result?.cluster_summaries?.map((cluster, index) => ({
+    cluster_id: cluster.cluster_id,
+    label: `Klaster ${String.fromCharCode(65 + index)}`,
+    count: cluster.stats.jumlah_data,
+  })) || [];
 
-  const spamClusters =
-    result?.cluster_summaries?.filter(
-      (c) => normalizeSpamLabel(c.spam_label) === "spam",
-    ).length || 0;
-  const clusterData =
-    result?.cluster_summaries?.map((cluster, index) => ({
-      cluster_id: cluster.cluster_id,
-      label: `Klaster ${String.fromCharCode(65 + index)}`,
-      count: cluster.stats.jumlah_data,
-    })) || [];
+  const handleDownloadCSV = () => {
+    console.log("Downloading CSV file...");
+  };
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <button
-              onClick={() => router.push("/beranda")}
-              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="font-medium">Kembali</span>
-            </button>
-            <button
-              onClick={downloadCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              <Download className="w-4 h-4" />
-              <span>Download CSV</span>
-            </button>
-          </div>
-        </div>
-      </div>
+    <main className="min-h-screen bg-[#FDFBF7] text-stone-800 px-6 pt-32 pb-8">
+      <div className="max-w-5xl mx-auto space-y-6">
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Post Info */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl p-6 mb-6 text-white shadow-lg">
-          <h1 className="text-2xl font-bold mb-2">Hasil Analisis CIB</h1>
-          <div className="flex items-center gap-2 text-blue-100">
-            <LinkIcon className="w-4 h-4" />
-            <a
-              href={result?.url || "#"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline flex items-center gap-1"
-            >
-              {result?.url || "No URL"}
-              <ExternalLink className="w-3 h-3" />
-            </a>
-          </div>
+        <div className="flex justify-end mb-1">
+          <button 
+            onClick={handleDownloadCSV}
+            className="flex items-center gap-2.5 bg-[#A54141] hover:bg-[#8B3535] text-white px-6 py-3 rounded-lg text-base font-bold transition-colors shadow-sm"
+          >
+            <Download className="w-5 h-5" />
+            Download CSV
+          </button>
         </div>
 
-        {/* Top Row: CIB Score + Temporal Chart */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* CIB Score Gauge */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4">Skor CIB</h2>
-            <GaugeChart
-              value={cibScore}
-              label="Terdeteksi pola manipulasi yang signifikan"
-            />
-          </div>
+        <div 
+          className="rounded-xl p-7 text-white shadow-md relative overflow-hidden"
+          style={{
+            background: "linear-gradient(101deg, #741D16 0%, #A54141 55%, #C4876B 100%)"
+          }}
+        >
+          <NetworkBackground />
 
-          {/* Temporal Analysis Chart */}
-          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                <Activity className="w-5 h-5" />
-                Pola Temporal Komentar
-              </h2>
-              {result.temporal_insight && (
-                <button className="text-sm px-3 py-1 bg-orange-100 text-orange-700 rounded-lg font-medium">
-                  Lonjakan Terdeteksi
-                </button>
-              )}
+          <div className="relative z-10 flex items-start gap-4.5">
+ 
+            <div className=" flex-shrink-0 shadow-inner">
+              <img 
+                src="/logo-cib.png" 
+                alt="Logo" 
+                className="w-35 h-35 object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    parent.innerHTML = `<svg class="w-8 h-8 text-[#E7E4BE]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.886H3.878l4.954 3.598L6.92 18.37 12 14.772l5.08 3.598-1.912-5.886 4.954-3.598h-6.21L12 3z"/></svg>`;
+                  }
+                }}
+              />
             </div>
-            <ResponsiveContainer width="100%" height={250}>
+
+            <div className="space-y-3">
+              <h1 className="text-3xl font-extrabold tracking-tight">CIB Analysis Results</h1>
+              <div className="flex items-center gap-2.5 text-[#E7E4BE] bg-black/15 w-fit px-4 py-2 rounded-lg border border-white/10">
+                <LinkIcon className="w-5 h-5" />
+                <a
+                  href={result?.url || "#"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline flex items-center gap-1.5 font-mono text-base font-medium"
+                >
+                  {result?.url || "No URL"}
+                  <ExternalLink className="w-5 h-5" />
+                </a>
+              </div>
+              <div className="text-sm bg-white/20 w-fit px-4 py-1.5 rounded font-bold tracking-wider uppercase flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                AI Verified Analysis
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6 flex flex-col justify-between">
+            <div className="flex items-center gap-1.5 mb-4">
+              <h2 className="text-lg font-bold text-stone-900">CIB Score</h2>
+              <span className="text-sm text-stone-400 hover:text-stone-600 cursor-help transition-colors font-medium" title="Coordinated Inauthentic Behavior Score">
+                ⓘ
+              </span>
+            </div>
+            <GaugeChart value={cibScore} label="Significant patterns of manipulation have been detected." />
+          </div>
+
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2.5">
+                <Activity className="w-5 h-5 text-[#A54141]" />
+                Temporal Comment Patterns
+              </h2>
+              <span className="text-sm px-3 py-1 bg-[#E7E4BE]/40 text-[#A54141] rounded-full border border-[#D9C49D] font-bold">
+                5 Spikes Detected
+              </span>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={result?.temporal_analysis || []}>
                 <defs>
-                  <linearGradient
-                    id="colorComments"
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop offset="5%" stopColor="#6366F1" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="#6366F1" stopOpacity={0} />
+                  <linearGradient id="colorWarmClay" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#A54141" stopOpacity={0.2} />
+                    <stop offset="95%" stopColor="#A54141" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                <XAxis dataKey="tanggal" stroke="#6B7280" fontSize={12} />
-                <YAxis stroke="#6B7280" fontSize={12} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                <XAxis dataKey="tanggal" stroke="#78716C" fontSize={13} />
+                <YAxis stroke="#78716C" fontSize={13} />
                 <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="jumlah_komentar"
-                  stroke="#6366F1"
-                  strokeWidth={2}
-                  fillOpacity={1}
-                  fill="url(#colorComments)"
-                />
+                <Area type="monotone" dataKey="jumlah_komentar" stroke="#A54141" strokeWidth={2.5} fillOpacity={1} fill="url(#colorWarmClay)" />
               </AreaChart>
             </ResponsiveContainer>
 
-            {/* Temporal Insight */}
             {result.temporal_insight && (
-              <div className="mt-4 bg-orange-50 border border-orange-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Lightbulb className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-semibold text-orange-900 mb-1">
-                      Insight:
-                    </p>
-                    <p className="text-sm text-orange-800">
-                      {result.temporal_insight.message}
-                    </p>
-                  </div>
+              <div className="mt-6 bg-[#E7E4BE]/20 border border-[#D9C49D]/60 rounded-lg p-5 flex gap-3.5">
+                <Lightbulb className="w-6 h-6 text-[#A54141] flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-base font-bold text-[#A54141] mb-1">Insight Executive:</p>
+                  <p className="text-base text-stone-700 leading-relaxed font-medium">{result.temporal_insight.message}</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Middle Row: Breakdown + Network Graph */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Breakdown Indikator */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6 space-y-6">
+            <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2.5">
+              <BarChart3 className="w-5 h-5 text-[#A54141]" />
               Breakdown Indikator
             </h2>
 
-            {/* Semantic Similarity */}
-            <div className="mb-6">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Kesamaan Semantik
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {Math.round(semanticSimilarity)}%
-                </span>
-              </div>
-              <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-full bg-red-500 rounded-full transition-all duration-1000"
-                  style={{ width: `${semanticSimilarity}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Tingkat kemiripan narasi antar komentar
-              </p>
-            </div>
-
-            {/* Temporal Anomaly */}
-            <div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Anomali Temporal
-                </span>
-                <span className="text-lg font-bold text-gray-900">
-                  {Math.round(temporalAnomaly)}%
-                </span>
-              </div>
-              <div className="relative h-3 bg-gray-200 rounded-full overflow-hidden">
-                <div
-                  className="absolute top-0 left-0 h-full bg-red-500 rounded-full transition-all duration-1000"
-                  style={{ width: `${temporalAnomaly}%` }}
-                />
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                Pola waktu posting yang tidak wajar
-              </p>
-            </div>
+    <div className="space-y-6">
+      <div className="space-y-6">
+        <div>
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-base font-semibold text-stone-600">
+              Semantic Similarity
+            </span>
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                semanticSimilarity >= 75
+                  ? "text-[#C63B32] bg-[#C63B32]/10"
+                  : semanticSimilarity >= 50
+                  ? "text-[#D76B4F] bg-[#D76B4F]/10"
+                  : "text-[#E08A3A] bg-[#E08A3A]/10"
+              }`}
+            >
+              {semanticSimilarity >= 75
+                ? "Very High"
+                : semanticSimilarity >= 50
+                ? "Medium"
+                : "Very Low"}
+            </span>
+            <span className="text-base font-extrabold text-stone-900">
+              {Math.round(semanticSimilarity)}%
+            </span>
           </div>
 
-          {/* Network Graph */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-              <Network className="w-5 h-5" />
-              Klaster Terkoordinasi
+          <div className="h-3 bg-[#EEE8E3] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${semanticSimilarity}%`,
+                background:
+                  semanticSimilarity >= 75
+                    ? "linear-gradient(90deg, #D9382C 0%, #C63B32 100%)"
+                    : semanticSimilarity >= 50
+                    ? "linear-gradient(90deg, #D76B4F 0%, #C85E46 100%)"
+                    : "linear-gradient(90deg, #E08A3A 0%, #D97706 100%)",
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-base font-semibold text-stone-600">
+              Temporal Anomaly
+            </span>
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                temporalAnomaly >= 75
+                  ? "text-[#C63B32] bg-[#C63B32]/10"
+                  : temporalAnomaly >= 50
+                  ? "text-[#D76B4F] bg-[#D76B4F]/10"
+                  : "text-[#E08A3A] bg-[#E08A3A]/10"
+              }`}
+            >
+              {temporalAnomaly >= 75
+                ? "Very High"
+                : temporalAnomaly >= 50
+                ? "Medium"
+                : "Very Low"}
+            </span>
+            <span className="text-base font-extrabold text-stone-900">
+              {Math.round(temporalAnomaly)}%
+            </span>
+          </div>
+
+          <div className="h-3 bg-[#EEE8E3] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${temporalAnomaly}%`,
+                background:
+                  temporalAnomaly >= 75
+                    ? "linear-gradient(90deg, #D9382C 0%, #C63B32 100%)"
+                    : temporalAnomaly >= 50
+                    ? "linear-gradient(90deg, #D76B4F 0%, #C85E46 100%)"
+                    : "linear-gradient(90deg, #E08A3A 0%, #D97706 100%)",
+              }}
+            />
+          </div>
+        </div>
+
+        <div>
+          <div className="flex justify-between items-center mb-2.5">
+            <span className="text-base font-semibold text-stone-600">
+              Behavioral Coordination
+            </span>
+            <span
+              className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+                behavioralCoordination >= 75
+                  ? "text-[#C63B32] bg-[#C63B32]/10"
+                  : behavioralCoordination >= 50
+                  ? "text-[#D76B4F] bg-[#D76B4F]/10"
+                  : "text-[#E08A3A] bg-[#E08A3A]/10"
+              }`}
+            >
+              {behavioralCoordination >= 75
+                ? "Very High"
+                : behavioralCoordination >= 50
+                ? "Medium"
+                : "Very Low"}
+            </span>
+            <span className="text-base font-extrabold text-stone-900">
+              {Math.round(behavioralCoordination)}%
+            </span>
+          </div>
+
+          <div className="h-3 bg-[#EEE8E3] rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full transition-all"
+              style={{
+                width: `${behavioralCoordination}%`,
+                background:
+                  behavioralCoordination >= 75
+                    ? "linear-gradient(90deg, #D9382C 0%, #C63B32 100%)"
+                    : behavioralCoordination >= 50
+                    ? "linear-gradient(90deg, #D76B4F 0%, #C85E46 100%)"
+                    : "linear-gradient(90deg, #E08A3A 0%, #D97706 100%)",
+              }}
+            />
+          </div>
+        </div>
+      </div>
+      </div>
+      </div>
+
+          <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
+            <h2 className="text-lg font-bold text-stone-900 mb-4 flex items-center gap-2.5">
+              <Network className="w-5 h-5 text-[#A54141]" />
+              Coordinated Clusters
             </h2>
             <NetworkGraph clusters={clusterData} />
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <StatsCard
-            icon={<MessageCircle className="w-6 h-6 text-blue-600" />}
-            label="Total Komentar"
-            value={(result?.comments_count || 0).toString()}
-            bgColor="bg-blue-50"
-          />
-          <StatsCard
-            icon={<Clock className="w-6 h-6 text-green-600" />}
-            label="Komentar Dibersihkan"
-            value={(result?.comments_cleaned_count || 0).toString()}
-            bgColor="bg-green-50"
-          />
-          <StatsCard
-            icon={<Network className="w-6 h-6 text-purple-600" />}
-            label="Jumlah Cluster"
-            value={(result?.cluster_summaries?.length || 0).toString()}
-            bgColor="bg-purple-50"
-          />
-          <StatsCard
-            icon={<AlertTriangle className="w-6 h-6 text-red-600" />}
-            label="Spam Terdeteksi"
-            value={spamClusters.toString()}
-            bgColor="bg-red-50"
-          />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <StatsCard icon={<MessageCircle className="w-6 h-6 text-[#A54141]" />} label="Total Comments" value={(result?.comments_count || 0).toString()} />
+          <StatsCard icon={<Clock className="w-6 h-6 text-[#A54141]" />} label="Cleaned Comments" value={(result?.comments_cleaned_count || 0).toString()} />
+          <StatsCard icon={<Network className="w-6 h-6 text-[#A54141]" />} label="Number of Clusters" value={(result?.cluster_summaries?.length || 0).toString()} />
+          <StatsCard icon={<AlertTriangle className="w-6 h-6 text-[#A54141]" />} label="Spam Detected" value={spamClusters.toString()} />
         </div>
 
-        {/* Suspicious Accounts Table */}
-        {result.suspicious_accounts &&
-          result.suspicious_accounts.length > 0 && (
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-red-600" />
-                  Daftar Akun Mencurigakan
-                  <span className="text-sm bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold">
-                    {result.suspicious_accounts.length} akun
+          <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2.5">
+                  List of Suspicious Accounts
+                  <span className="text-sm px-3 py-1 bg-[#A54141]/10 text-[#A54141] rounded-full font-bold">
+                    {result.suspicious_accounts.length} account
                   </span>
                 </h2>
-                <div className="flex gap-3">
-                  <div className="relative">
-                    <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Cari username..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <select
-                    value={accountFilter}
-                    onChange={(e) => setAccountFilter(e.target.value)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="all">Semua Level</option>
-                    <option value="Tinggi">Tinggi</option>
-                    <option value="Sedang">Sedang</option>
-                    <option value="Rendah">Rendah</option>
-                  </select>
-                </div>
               </div>
+              <div className="flex gap-3">
+                <div className="relative">
+                  <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                  <input
+                    type="text"
+                    placeholder="Search for username..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 pr-4 py-2.5 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none focus:ring-1 focus:ring-[#A54141]"
+                  />
+                </div>
+                <select
+                  value={accountFilter}
+                  onChange={(e) => setAccountFilter(e.target.value)}
+                  className="px-4 py-2.5 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none text-stone-600 focus:ring-1 focus:ring-[#A54141] font-medium"
+                >
+                  <option value="all">All Levels</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Low">Low</option>
+                </select>
+              </div>
+            </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50 border-b border-gray-200">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Username
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Risk Score
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Cluster Behavior
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Komentar
-                      </th>
-                      <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">
-                        Pattern Terdeteksi
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {filteredAccounts?.map((account, index) => (
+            <div className="overflow-x-auto rounded-lg border border-stone-100">
+              <table className="w-full text-left text-base border-collapse">
+                <thead className="bg-stone-50 text-stone-600 font-bold border-b border-stone-200 uppercase tracking-wider text-sm">
+                  <tr>
+                    <th className="py-5 px-4">Username</th>
+                    <th className="py-5 px-4">Risk Score</th>
+                    <th className="py-5 px-4">Cluster Behavior</th>
+                    <th className="py-5 px-4 text-center">Komentar</th>
+                    <th className="py-5 px-4">Pattern Terdeteksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100">
+                  {filteredAccounts.length > 0 ? (
+                    filteredAccounts.map((account, index) => (
                       <tr
                         key={index}
-                        className="hover:bg-gray-50 transition-colors border-l-4"
-                        style={{
-                          borderLeftColor:
-                            account.risk_score === "Tinggi"
-                              ? "#EF4444"
-                              : account.risk_score === "Sedang"
-                                ? "#F59E0B"
-                                : "#F97316",
-                        }}
+                        className="hover:bg-stone-50/50 transition-colors"
                       >
-                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                          {account.username}
+                        <td className="py-5 px-4 font-bold text-stone-700">
+                          @{account.username}
                         </td>
-                        <td className="px-4 py-3">
+
+                        <td className="py-5 px-4">
                           <span
-                            className={`text-xs px-2 py-1 rounded-full font-semibold ${
-                              account.risk_score === "Tinggi"
-                                ? "bg-red-100 text-red-700"
-                                : account.risk_score === "Sedang"
-                                  ? "bg-yellow-100 text-yellow-700"
-                                  : "bg-orange-100 text-orange-700"
+                            className={`text-xs px-3 py-1 rounded-md font-extrabold ${
+                              account.risk_score === "High"
+                                ? "bg-[#A54141]/10 text-[#A54141]"
+                                : account.risk_score === "Medium"
+                                ? "bg-[#C4876B]/10 text-[#C4876B]"
+                                : "bg-stone-100 text-stone-600"
                             }`}
                           >
                             {account.risk_score}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm text-blue-600 font-medium">
-                            {account.cluster_behavior}
-                          </span>
+
+                        <td
+                          className={`py-5 px-4 font-semibold ${
+                            account.cluster_behavior.includes("Coordinated")
+                              ? "text-[#A54141]"
+                              : "text-emerald-600"
+                          }`}
+                        >
+                          {account.cluster_behavior}
                         </td>
-                        <td className="px-4 py-3">
-                          <span className="text-sm bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">
-                            {account.comment_count}
-                          </span>
+
+                        <td className="py-5 px-4 text-center font-extrabold text-stone-700">
+                          {account.comment_count}
                         </td>
-                        <td className="px-4 py-3 text-sm text-gray-600">
+
+                        <td className="py-5 px-4 text-stone-500 font-medium">
                           {account.pattern}
                         </td>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Catatan */}
-              <div className="mt-4 bg-orange-50 border-l-4 border-orange-400 p-4 rounded-r-lg">
-                <p className="text-sm text-orange-800">
-                  <span className="font-semibold">Catatan:</span> Risk Score
-                  dihitung berdasarkan analisis perilaku klaster, kemiripan
-                  semantik komentar, dan anomali temporal. Semakin tinggi skor,
-                  semakin mencurigakan perilaku akun tersebut.
-                </p>
-              </div>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="py-10 text-center text-stone-400 font-semibold"
+                      >
+                        No data found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          )}
+          </div>
 
-        {/* Clusters List */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-              <Network className="w-6 h-6" />
-              Detail Cluster ({filteredClusters?.length || 0})
+          <div className="flex justify-between items-center">
+            <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2.5">
+              <Network className="w-5 h-5 text-stone-700" />
+              Detail Cluster ({filteredClusters.length})
             </h2>
             <select
               value={filterLabel}
               onChange={(e) => setFilterLabel(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none focus:ring-1 focus:ring-[#A54141] font-medium"
             >
-              <option value="all">Semua Label</option>
+              <option value="all">All categories</option>
               <option value="spam">Spam</option>
               <option value="suspicious">Suspicious</option>
               <option value="normal">Normal</option>
             </select>
           </div>
 
-          {filteredClusters?.map((cluster) => (
-            <ClusterCard
-              key={cluster.cluster_id}
-              cluster={cluster}
-              isExpanded={selectedCluster === cluster.cluster_id}
-              onToggle={() =>
-                setSelectedCluster(
-                  selectedCluster === cluster.cluster_id
-                    ? null
-                    : cluster.cluster_id,
-                )
-              }
-            />
-          ))}
-
-          {filteredClusters?.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 text-sm text-yellow-800">
-              Data klaster belum tersedia dari backend. Scraping sudah masuk,
-              tetapi proses clustering/summary belum dikirim oleh service
-              analisis.
+          {filteredClusters.length > 0 ? (
+            filteredClusters.map((cluster) => (
+              <ClusterCard
+                key={cluster.cluster_id}
+                cluster={cluster}
+                isExpanded={selectedCluster === cluster.cluster_id}
+                onToggle={() =>
+                  setSelectedCluster(
+                    selectedCluster === cluster.cluster_id ? null : cluster.cluster_id
+                  )
+                }
+              />
+            ))
+          ) : (
+            <div className="bg-white border border-[#D9C49D]/60 rounded-xl p-10 text-center text-stone-400 font-semibold">
+              No cluster data found for selected filter
             </div>
           )}
         </div>
@@ -558,14 +947,14 @@ export default function DashboardPage() {
   );
 }
 
-function StatsCard({ icon, label, value, bgColor }: any) {
+function StatsCard({ icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className={`${bgColor} rounded-xl p-6 border border-gray-200`}>
-      <div className="flex items-center justify-between mb-2">
-        <div>{icon}</div>
+    <div className="bg-white rounded-xl p-6 border border-[#D9C49D]/60 shadow-sm flex items-center gap-4">
+      <div className="p-4 bg-[#E7E4BE]/30 rounded-xl flex-shrink-0">{icon}</div>
+      <div>
+        <p className="text-xs text-stone-400 font-bold uppercase tracking-wider mb-1">{label}</p>
+        <p className="text-3xl font-extrabold text-stone-800">{value}</p>
       </div>
-      <p className="text-sm text-gray-600 mb-1">{label}</p>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
     </div>
   );
 }
@@ -575,104 +964,119 @@ function ClusterCard({
   isExpanded,
   onToggle,
 }: {
-  cluster: ClusterSummary;
+  cluster: any;
   isExpanded: boolean;
   onToggle: () => void;
 }) {
-  const getSpamColor = (label: string) => {
-    switch (normalizeSpamLabel(label)) {
-      case "spam":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "suspicious":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      default:
-        return "bg-green-100 text-green-800 border-green-200";
-    }
-  };
-
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 overflow-hidden transition-all">
       <div
-        className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+        className="p-6 cursor-pointer hover:bg-stone-50/50 flex items-start justify-between"
         onClick={onToggle}
       >
-        <div className="flex items-start justify-between">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <span className="text-sm font-mono bg-gray-100 px-3 py-1 rounded-lg text-gray-700">
+        <div className="flex flex-col lg:flex-row gap-6 w-full">
+          <div className="flex-1 space-y-3">
+            
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-mono bg-stone-100 px-2.5 py-0.5 rounded text-stone-600 font-extrabold">
                 Cluster #{cluster.cluster_id}
               </span>
-              <span
-                className={`text-xs px-3 py-1 rounded-full border font-semibold ${getSpamColor(cluster.spam_label)}`}
-              >
+
+              <span className="text-xs px-3 py-1 rounded-full font-extrabold bg-[#E7E4BE]/60 text-stone-700 uppercase tracking-wider">
                 {spamLabelDisplay(cluster.spam_label)}
               </span>
-              <span className="text-sm text-gray-600 flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                {cluster.stats.jumlah_data} komentar
+
+              <span className="text-base text-stone-400 font-semibold flex items-center gap-2">
+                <Users className="w-5 h-5" />
+                {cluster.stats.jumlah_data} comment
               </span>
             </div>
-            <p className="text-gray-700 mb-4">{cluster.summary}</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-1">Spam Score</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {(cluster.stats.spam_score * 100).toFixed(1)}%
-                </p>
+
+            <p className="text-base text-stone-600 font-bold leading-relaxed">
+              {cluster.summary}
+            </p>
+          </div>
+          <div className="w-full lg:w-[420px] flex flex-row gap-4 justify-between">
+
+            <div>
+              <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
+                Spam Score
               </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-1">Unique Ratio</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {(cluster.stats.unique_ratio * 100).toFixed(1)}%
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-1">Repetition</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {cluster.stats.repetition_score.toFixed(2)}
-                </p>
-              </div>
-              <div className="bg-gray-50 rounded-lg p-3">
-                <p className="text-xs text-gray-600 mb-1">Avg Length</p>
-                <p className="text-lg font-bold text-gray-900">
-                  {cluster.stats.avg_comment_length.toFixed(0)}
-                </p>
+              <div className="text-base font-extrabold text-stone-800">
+                {(cluster.stats.spam_score * 100).toFixed(1)}%
               </div>
             </div>
+
+            <div>
+              <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
+                Unique Ratio
+              </div>
+              <div className="text-base font-extrabold text-stone-800">
+                {(cluster.stats.unique_ratio * 100).toFixed(1)}%
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
+                Repetition
+              </div>
+              <div className="text-base font-extrabold text-stone-800">
+                {cluster.stats.repetition_score.toFixed(1)}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
+                Avg length
+              </div>
+              <div className="text-base font-extrabold text-stone-800">
+                {cluster.stats.avg_comment_length}
+              </div>
+            </div>
+
           </div>
-          <button className="ml-4 p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            {isExpanded ? (
-              <ChevronUp className="w-5 h-5 text-gray-600" />
-            ) : (
-              <ChevronDown className="w-5 h-5 text-gray-600" />
-            )}
-          </button>
+        </div>
+        <div className="ml-4 p-1 text-stone-400">
+          {isExpanded ? (
+            <ChevronUp className="w-6 h-6" />
+          ) : (
+            <ChevronDown className="w-6 h-6" />
+          )}
         </div>
       </div>
-
       {isExpanded && (
-        <div className="border-t border-gray-200 bg-gray-50 p-6">
-          <h4 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+        <div className="border-t border-stone-100 bg-stone-50/50 p-6">
+          <h4 className="text-sm font-bold text-stone-400 uppercase tracking-wider flex items-center gap-2 mb-4">
             <MessageCircle className="w-5 h-5" />
-            Komentar dalam Cluster ({cluster.comments.length})
+            Sample Conversation Cluster
           </h4>
-          <div className="space-y-3 max-h-96 overflow-y-auto">
-            {cluster.comments.map((comment, idx) => (
-              <div
-                key={idx}
-                className="bg-white p-4 rounded-lg border border-gray-200"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-semibold text-blue-600">
-                    @{comment.username}
-                  </span>
-                  <span className="text-xs text-gray-500">
-                    {comment.tanggal}
-                  </span>
-                </div>
-                <p className="text-gray-700 text-sm">{comment.komentar}</p>
-              </div>
-            ))}
+
+          <div className="overflow-x-auto rounded-lg border border-stone-200 bg-white">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-stone-100 text-stone-600 text-sm uppercase tracking-wider">
+                <tr>
+                  <th className="px-4 py-3 font-bold">Username</th>
+                  <th className="px-4 py-3 font-bold">Time</th>
+                  <th className="px-4 py-3 font-bold">Comment</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-stone-100">
+                {cluster.comments.map((comment: any, idx: number) => (
+                  <tr key={idx} className="hover:bg-stone-50 transition-colors">
+                    <td className="px-4 py-3 font-semibold text-[#A54141]">
+                      @{comment.username}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-stone-500">
+                      {comment.tanggal}
+                    </td>
+                    <td className="px-4 py-3 text-stone-700">
+                      {comment.komentar}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

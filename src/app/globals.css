@@ -24,3 +24,86 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes anim-slide-left {
+  from {
+    opacity: 0;
+    transform: translateX(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes anim-slide-right {
+  from {
+    opacity: 0;
+    transform: translateX(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes anim-rise {
+  from {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes anim-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes anim-tilt-in {
+  from {
+    opacity: 0;
+    transform: translateY(24px) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.card-anim-left {
+  animation: anim-slide-left 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.card-anim-right {
+  animation: anim-slide-right 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.card-anim-rise {
+  animation: anim-rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.card-anim-scale {
+  animation: anim-scale-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.card-anim-tilt {
+  animation: anim-tilt-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-anim-left,
+  .card-anim-right,
+  .card-anim-rise,
+  .card-anim-scale,
+  .card-anim-tilt {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -570,7 +570,7 @@ export default function TentangPage() {
               </div>
             </div>
             <Link
-              href="/beranda#analisis"
+              href="/home#analisis"
               className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-bold text-neutral-900 shadow-lg transition hover:brightness-105 sm:w-auto md:px-7 md:py-3.5 md:text-base"
               style={{ backgroundColor: pageBg }}
             >

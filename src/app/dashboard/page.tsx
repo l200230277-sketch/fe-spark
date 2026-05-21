@@ -178,10 +178,16 @@ const GaugeChart = ({ value, label }: { value: number; label: string }) => {
   );
 };
 
-const NetworkGraph = ({
+  const NetworkGraph = ({
   clusters,
+  showAllClusters,
+  setShowAllClusters,
+  onSelectCluster,
 }: {
   clusters: any[];
+  showAllClusters: boolean;
+  setShowAllClusters: React.Dispatch<React.SetStateAction<boolean>>;
+  onSelectCluster: (id: number) => void;
 }) => {
   const clusterConfigs = [
   {
@@ -349,7 +355,18 @@ const NetworkGraph = ({
             </div>
           ))}
 
-          <button className="w-full mt-6 border border-[#D7A98C] text-[#9A4B3B] font-semibold rounded-xl py-3 hover:bg-[#FFF4EC] transition-all duration-300">
+          <button
+            onClick={() => {
+              onSelectCluster(1);
+
+              document
+                .getElementById("cluster-section")
+                ?.scrollIntoView({
+                  behavior: "smooth",
+                });
+            }}
+            className="w-full mt-6 border border-[#D7A98C] text-[#9A4B3B] font-semibold rounded-xl py-3 hover:bg-[#FFF4EC] transition-all duration-300"
+          >
             View Cluster Details →
           </button>
         </div>
@@ -414,9 +431,41 @@ const MOCK_DATA: AnalysisResult = {
   ],
 cluster_summaries: [
   {
+    cluster_id: 1,
+    spam_label: "spam",
+    summary:
+      "Komentar didominasi pola promosi berulang dengan kata: gratis, cuan, saldo, link bio",
+    stats: {
+      jumlah_data: 42,
+      spam_score: 0.91,
+      unique_ratio: 0.32,
+      repetition_score: 0.88,
+      avg_comment_length: 18,
+    },
+    comments: [
+      {
+        username: "promo_cepat",
+        tanggal: "08:12",
+        komentar: "gratis saldo sekarang cek link bio",
+      },
+      {
+        username: "cuaninstan",
+        tanggal: "08:13",
+        komentar: "link bio buat dapet saldo gratis",
+      },
+      {
+        username: "viral.money",
+        tanggal: "08:14",
+        komentar: "ayo cuan cepat sebelum ditutup",
+      },
+    ],
+  },
+
+  {
     cluster_id: 2,
     spam_label: "normal",
-    summary: "The pattern of comments is dominated by: wajiibbb, bener, poko, nih, aja",
+    summary:
+      "Pola komentar natural dengan kata dominan: wajiibbb, bener, poko, nih, aja",
     stats: {
       jumlah_data: 25,
       spam_score: 0.114,
@@ -430,13 +479,55 @@ cluster_summaries: [
         tanggal: "14:02",
         komentar: "wajiibbb dicoba ini mah beneran bagus",
       },
+      {
+        username: "user_2",
+        tanggal: "14:04",
+        komentar: "poko wajib sih ini",
+      },
+      {
+        username: "user_3",
+        tanggal: "14:08",
+        komentar: "bener banget setuju",
+      },
     ],
   },
 
   {
     cluster_id: 3,
+    spam_label: "suspicious",
+    summary:
+      "Ditemukan kemiripan struktur komentar dengan pola engagement boosting.",
+    stats: {
+      jumlah_data: 31,
+      spam_score: 0.58,
+      unique_ratio: 0.61,
+      repetition_score: 0.47,
+      avg_comment_length: 21,
+    },
+    comments: [
+      {
+        username: "boost.id",
+        tanggal: "10:11",
+        komentar: "mantap banget support terus",
+      },
+      {
+        username: "akunaktif",
+        tanggal: "10:12",
+        komentar: "keren banget support selalu",
+      },
+      {
+        username: "real.user",
+        tanggal: "10:13",
+        komentar: "bagus banget lanjut terus",
+      },
+    ],
+  },
+
+  {
+    cluster_id: 4,
     spam_label: "normal",
-    summary: "Dominant comments: mantap, gas, keren",
+    summary:
+      "Cluster berisi diskusi normal dengan variasi komentar tinggi.",
     stats: {
       jumlah_data: 18,
       spam_score: 0.09,
@@ -446,23 +537,127 @@ cluster_summaries: [
     },
     comments: [
       {
-        username: "user_2",
+        username: "andika",
         tanggal: "15:20",
         komentar: "mantap banget ini serius",
       },
+      {
+        username: "rian",
+        tanggal: "15:24",
+        komentar: "suka konsep kontennya",
+      },
+      {
+        username: "fahmi",
+        tanggal: "15:30",
+        komentar: "editingnya clean banget",
+      },
     ],
   },
-],
-};
+
+  {
+    cluster_id: 5,
+    spam_label: "spam",
+    summary:
+      "Aktivitas komentar massal terdeteksi dalam interval waktu sangat singkat.",
+    stats: {
+      jumlah_data: 53,
+      spam_score: 0.97,
+      unique_ratio: 0.21,
+      repetition_score: 0.93,
+      avg_comment_length: 14,
+    },
+    comments: [
+      {
+        username: "moneydrop",
+        tanggal: "09:01",
+        komentar: "cek bio sekarang juga",
+      },
+      {
+        username: "moneydrop2",
+        tanggal: "09:01",
+        komentar: "cek bio sekarang juga",
+      },
+      {
+        username: "moneydrop3",
+        tanggal: "09:02",
+        komentar: "cek bio sekarang juga",
+      },
+    ],
+  },
+
+  {
+    cluster_id: 6,
+    spam_label: "suspicious",
+    summary:
+      "Komentar terlihat dibuat untuk meningkatkan persepsi engagement secara artifisial.",
+    stats: {
+      jumlah_data: 27,
+      spam_score: 0.66,
+      unique_ratio: 0.54,
+      repetition_score: 0.51,
+      avg_comment_length: 19,
+    },
+    comments: [
+      {
+        username: "viewer_real",
+        tanggal: "18:02",
+        komentar: "keren parah sih",
+      },
+      {
+        username: "supporting.id",
+        tanggal: "18:03",
+        komentar: "keren banget support",
+      },
+      {
+        username: "dailyboost",
+        tanggal: "18:03",
+        komentar: "support terus kontennya",
+      },
+    ],
+  },
+
+  {
+    cluster_id: 7,
+    spam_label: "normal",
+    summary:
+      "Komentar organik dengan variasi topik dan gaya bahasa berbeda.",
+    stats: {
+      jumlah_data: 15,
+      spam_score: 0.05,
+      unique_ratio: 0.96,
+      repetition_score: 0.03,
+      avg_comment_length: 29,
+    },
+    comments: [
+      {
+        username: "lina",
+        tanggal: "20:11",
+        komentar: "aku baru tau ternyata bisa kayak gini",
+      },
+      {
+        username: "siska",
+        tanggal: "20:15",
+        komentar: "penasaran pengen coba juga",
+      },
+      {
+        username: "bayu",
+        tanggal: "20:19",
+        komentar: "informasinya membantu banget",
+      },
+    ],
+  },
+],};
 
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<number | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [accountSearch, setAccountSearch] = useState("");
+  const [clusterSearch, setClusterSearch] = useState("");
   const [filterLabel, setFilterLabel] = useState<string>("all");
   const [accountFilter, setAccountFilter] = useState<string>("all");
+  const [showAllClusters, setShowAllClusters] = useState(false);
 
   useEffect(() => {
     loadAnalysisResult();
@@ -486,8 +681,8 @@ export default function DashboardPage() {
   const filteredClusters =
     result?.cluster_summaries?.filter((cluster) => {
       const matchesSearch =
-        cluster.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        cluster.cluster_id.toString().includes(searchTerm);
+        cluster.summary.toLowerCase().includes(clusterSearch.toLowerCase()) ||
+        cluster.cluster_id.toString().includes(clusterSearch);
       const matchesFilter =
         filterLabel === "all" || normalizeSpamLabel(cluster.spam_label) === filterLabel;
       return matchesSearch && matchesFilter;
@@ -495,7 +690,7 @@ export default function DashboardPage() {
 
   const filteredAccounts =
     result?.suspicious_accounts?.filter((account) => {
-      const keyword = searchTerm.toLowerCase();
+      const keyword = accountSearch.toLowerCase();
 
       const matchesSearch =
         account.username.toLowerCase().includes(keyword) ||
@@ -529,11 +724,16 @@ export default function DashboardPage() {
   const temporalAnomaly = (result?.temporal_anomaly ?? 0) * 100;
   const behavioralCoordination = result?.cib_score ?? 0;
   const spamClusters = result?.cluster_summaries?.filter((c) => normalizeSpamLabel(c.spam_label) === "spam").length || 0;
-  const clusterData = result?.cluster_summaries?.map((cluster, index) => ({
-    cluster_id: cluster.cluster_id,
-    label: `Klaster ${String.fromCharCode(65 + index)}`,
-    count: cluster.stats.jumlah_data,
-  })) || [];
+  const allClusterData =
+    result?.cluster_summaries?.map((cluster, index) => ({
+      cluster_id: cluster.cluster_id,
+      label: `Cluster ${String.fromCharCode(65 + index)}`,
+      count: cluster.stats.jumlah_data,
+    })) || [];
+
+  const clusterData = showAllClusters
+    ? allClusterData
+    : allClusterData.slice(0, 5);
 
   const handleDownloadCSV = () => {
     console.log("Downloading CSV file...");
@@ -541,7 +741,7 @@ export default function DashboardPage() {
 
   return (
     <main className="min-h-screen bg-[#FDFBF7] text-stone-800 px-6 pt-32 pb-8">
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-6xl mx-auto space-y-6">
 
         <div className="flex justify-end mb-1">
           <button 
@@ -561,13 +761,13 @@ export default function DashboardPage() {
         >
           <NetworkBackground />
 
-          <div className="relative z-10 flex items-start gap-4.5">
+          <div className="relative z-10 flex items-center gap-3 sm:gap-5 -ml-4 sm:ml-0">
  
             <div className=" flex-shrink-0 shadow-inner">
               <img 
                 src="/logo-cib.png" 
                 alt="Logo" 
-                className="w-35 h-35 object-contain"
+                className="w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-35 lg:h-35 object-contain"
                 onError={(e) => {
                   e.currentTarget.style.display = 'none';
                   const parent = e.currentTarget.parentElement;
@@ -579,14 +779,14 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-3xl font-extrabold tracking-tight">CIB Analysis Results</h1>
-              <div className="flex items-center gap-2.5 text-[#E7E4BE] bg-black/15 w-fit px-4 py-2 rounded-lg border border-white/10">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">CIB Analysis Results</h1>
+              <div className="flex items-center gap-2 text-[#E7E4BE] bg-black/15 w-fit max-w-full px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/10 overflow-hidden">
                 <LinkIcon className="w-5 h-5" />
                 <a
                   href={result?.url || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline flex items-center gap-1.5 font-mono text-base font-medium"
+                  className="hover:underline flex items-center gap-1 text-[11px] sm:text-sm md:text-base font-mono font-medium truncate"
                 >
                   {result?.url || "No URL"}
                   <ExternalLink className="w-5 h-5" />
@@ -790,9 +990,15 @@ export default function DashboardPage() {
               <Network className="w-5 h-5 text-[#A54141]" />
               Coordinated Clusters
             </h2>
-            <NetworkGraph clusters={clusterData} />
+
+            <NetworkGraph
+              clusters={clusterData}
+              showAllClusters={showAllClusters}
+              setShowAllClusters={setShowAllClusters}
+              onSelectCluster={(id) => setSelectedCluster(id)}
+            />
           </div>
-        </div>
+          </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatsCard icon={<MessageCircle className="w-6 h-6 text-[#A54141]" />} label="Total Comments" value={(result?.comments_count || 0).toString()} />
@@ -817,8 +1023,8 @@ export default function DashboardPage() {
                   <input
                     type="text"
                     placeholder="Search for username..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    value={accountSearch}
+                    onChange={(e) => setAccountSearch(e.target.value)}
                     className="pl-10 pr-4 py-2.5 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none focus:ring-1 focus:ring-[#A54141]"
                   />
                 </div>
@@ -905,7 +1111,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-        <div className="space-y-4">
+        <div id="cluster-section" className="space-y-4">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2.5">
               <Network className="w-5 h-5 text-stone-700" />

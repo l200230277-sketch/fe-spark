@@ -16,8 +16,8 @@ export default function Header() {
   const isFloatingNav = pathname === "/home" || pathname === "/about" || pathname === "/dashboard";
   const navTagline =
     pathname === "/about"
-      ? "Kecerdasan Kepercayaan Digital"
-      : "Kepercayaan Digital. Dampak Nyata.";
+      ? "Digital Trust. Real Impact."
+      : "Digital Trust. Real Impact.";
   const navCtaLabel = pathname === "/about" ? "Mulai Analisis" : "Analisis Sekarang";
 
   const navItems = [
@@ -164,7 +164,7 @@ export default function Header() {
           </div>
           <div className="leading-tight">
             <span className="block text-base font-bold text-neutral-900">INDOBUZZTRA</span>
-            <span className="text-[11px] text-neutral-500">Kepercayaan Digital. Dampak Nyata.</span>
+            <span className="text-[11px] text-neutral-500">Digital Trust. Real Impact.</span>
           </div>
         </Link>
 

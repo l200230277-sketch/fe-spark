@@ -24,6 +24,9 @@ import {
   Target,
   Users,
   Code2,
+  Columns3Cog,
+  Worm,
+  SquareCode,
 } from "lucide-react";
 
 const terracotta = "#A54141";
@@ -147,10 +150,11 @@ export default function TentangPage() {
   ];
 
   const techCards = [
-    { title: "Mesin Deteksi",          items: [{ icon: Link2,     text: "TF-IDF + K-Means (Clustering)" }, { icon: Code2,    text: "Python (Core Engine)" }] },
-    { title: "Infrastruktur Backend",  items: [{ icon: Flame,     text: "Flask (Backend API)" },           { icon: FileJson, text: "JSON (Format Data)" }] },
-    { title: "Antarmuka Frontend",     items: [{ icon: Code2,     text: "Next.js (Framework Frontend)" }] },
+    { title: "Mesin Deteksi",          items: [{ icon: Link2,     text: "Sentence-BERT / Multilingual MiniLM (Semantic Embedding)" }, { icon: Code2,    text: "K-Means & HDBSCAN (Adaptive Clustering)" }, { icon: Columns3Cog,     text: "mT5 + LLM-Assisted Temporal Analysis" }, { icon: Worm,text: "Python (Core Engine)" }, ] },
+    { title: "Infrastruktur Backend",  items: [{ icon: Flame,     text: "FastAPI (Backend API)" }, { icon: FileJson, text: "JSON (Format Data)" }] },
+    { title: "Antarmuka Frontend",     items: [{ icon: Shield,     text: "Next.js (Framework Frontend)" }] },
     { title: "Visualisasi Data",       items: [{ icon: BarChart3, text: "Recharts (Visualisasi)" }] },
+    { title: "Akuisisi & Pemrosesan Data",       items: [{ icon: SquareCode, text: "BeautifulSoup4 (HTML Parsing & Scraping)" }] },
   ];
 
   type DotItem = { size: number; opacity: number; top?: string; left?: string; right?: string; bottom?: string };
@@ -509,26 +513,108 @@ export default function TentangPage() {
           <p className="mb-6 max-w-2xl text-[13px] leading-[1.7] text-neutral-600 md:mb-10 md:text-base">
             Stack yang dipilih untuk iterasi cepat, transparansi algoritma, dan visualisasi hasil yang mudah dibaca.
           </p>
-          <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
-            {techCards.map((card) => (
-              <div key={card.title} className="rounded-xl border bg-white/60 p-3 shadow-sm md:rounded-2xl md:p-5"
-                style={{ borderColor: `${sandBeige}aa` }}>
-                <p className="text-[12px] font-bold text-neutral-900 md:text-sm">{card.title}</p>
-                <ul className="mt-2 space-y-2 md:mt-4 md:space-y-3">
-                  {card.items.map((it) => {
-                    const Ic = it.icon;
-                    return (
-                      <li key={it.text} className="flex items-start gap-2 text-[11px] text-neutral-700 md:gap-2.5 md:text-sm">
-                        <Ic className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4" style={{ color: terracotta }} />
-                        <span>{it.text}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
+          <div className="grid items-stretch gap-4 lg:grid-cols-3">
+  <div
+  className="rounded-xl border bg-white/60 p-3 shadow-sm md:rounded-2xl md:p-5 lg:row-span-2"
+  style={{
+    borderColor: `${sandBeige}aa`,
+    height: "calc(100% - 13px)",
+  }}
+>
+    <p className="text-[12px] font-bold text-neutral-900 md:text-sm">
+      {techCards[0].title}
+    </p>
+
+    <ul className="mt-2 space-y-2 md:mt-4 md:space-y-3">
+      {techCards[0].items.map((it) => {
+        const Ic = it.icon;
+
+        return (
+          <li
+            key={it.text}
+            className="flex items-start gap-2 text-[11px] text-neutral-700 md:gap-2.5 md:text-sm"
+          >
+            <Ic
+              className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4"
+              style={{ color: terracotta }}
+            />
+
+            <span>{it.text}</span>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+
+  <div className="flex h-full flex-col gap-4">
+    {techCards.slice(1, 3).map((card) => (
+      <div
+        key={card.title}
+        className="flex-1 rounded-xl border bg-white/60 p-3 shadow-sm md:rounded-2xl md:p-5"
+        style={{ borderColor: `${sandBeige}aa` }}
+      >
+        <p className="text-[12px] font-bold text-neutral-900 md:text-sm">
+          {card.title}
+        </p>
+
+        <ul className="mt-2 space-y-2 md:mt-4 md:space-y-3">
+          {card.items.map((it) => {
+            const Ic = it.icon;
+
+            return (
+              <li
+                key={it.text}
+                className="flex items-start gap-2 text-[11px] text-neutral-700 md:gap-2.5 md:text-sm"
+              >
+                <Ic
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4"
+                  style={{ color: terracotta }}
+                />
+
+                <span>{it.text}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </div>
+
+  <div className="flex h-full flex-col gap-4">
+    {techCards.slice(3, 5).map((card) => (
+      <div
+        key={card.title}
+        className="flex-1 rounded-xl border bg-white/60 p-3 shadow-sm md:rounded-2xl md:p-5"
+        style={{ borderColor: `${sandBeige}aa` }}
+      >
+        <p className="text-[12px] font-bold text-neutral-900 md:text-sm">
+          {card.title}
+        </p>
+
+        <ul className="mt-2 space-y-2 md:mt-4 md:space-y-3">
+          {card.items.map((it) => {
+            const Ic = it.icon;
+
+            return (
+              <li
+                key={it.text}
+                className="flex items-start gap-2 text-[11px] text-neutral-700 md:gap-2.5 md:text-sm"
+              >
+                <Ic
+                  className="mt-0.5 h-3.5 w-3.5 shrink-0 md:h-4 md:w-4"
+                  style={{ color: terracotta }}
+                />
+
+                <span>{it.text}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    ))}
+  </div>
+</div>
+</div>
       </section>
 
       <section className="px-5 py-10 md:px-8 md:py-20" style={{ backgroundColor: pageBg }}>

@@ -113,21 +113,21 @@ export default function TentangPage() {
     {
       icon: AlertTriangle,
       title: "Manipulasi Opini Publik",
-      desc: "Jaringan buzzer menyebarkan narasi buatan secara sistematis untuk mempengaruhi persepsi masyarakat pada postingan viral.",
+      desc: "Jaringan akun terkoordinasi dapat menyebarkan narasi tertentu secara masif untuk membentuk persepsi publik terhadap isu politik di media sosial.",
       severityLabel: "Dampak Tinggi",
       severityFilled: 3,
     },
     {
       icon: Users,
       title: "Coordinated Inauthentic Behavior",
-      desc: "Perilaku tidak otentik yang terkoordinasi sulit dikenali pengguna awam, namun merusak legitimasi diskusi publik.",
+      desc: "Aktivitas komentar yang dilakukan secara sinkron dan repetitif sulit dikenali secara manual, namun dapat memengaruhi legitimasi diskusi publik secara signifikan.",
       severityLabel: "Risiko Aktif",
       severityFilled: 3,
     },
     {
       icon: Target,
       title: "Polarisasi Masyarakat",
-      desc: "Konten manipulatif memecah belah opini dan mengurangi ruang bagi dialog berbasis fakta di media sosial.",
+      desc: "Penyebaran narasi manipulatif secara terus-menerus dapat memperkuat polarisasi sosial dan mengurangi ruang dialog berbasis fakta di media digital.",
       severityLabel: "Dampak Struktural",
       severityFilled: 2,
     },
@@ -141,9 +141,9 @@ export default function TentangPage() {
   ];
 
   const contribution = [
-    { n: "01", title: "Transparansi Informasi", desc: "Data yang dapat diverifikasi secara mandiri oleh masyarakat, jurnalis, dan peneliti sosial.", icon: ScanSearch },
-    { n: "02", title: "Literasi Digital",        desc: "Memberdayakan masyarakat dengan daya pikir kritis agar tidak mudah terpolarisasi oleh narasi buatan.", icon: Users },
-    { n: "03", title: "Demokrasi Informasi",     desc: "Menjaga ruang digital Indonesia tetap sehat dan mendukung lingkungan media sosial yang lebih jujur.", icon: Landmark },
+    { n: "01", title: "Transparansi Informasi", desc: "Membantu masyarakat memahami pola manipulasi narasi digital melalui visualisasi dan analisis data komentar secara objektif.", icon: ScanSearch },
+    { n: "02", title: "Literasi Digital",        desc: "Mendorong masyarakat agar lebih kritis terhadap penyebaran opini buatan, spam politik, dan aktivitas buzzer terkoordinasi.", icon: Users },
+    { n: "03", title: "Demokrasi Informasi",     desc: "Mendukung terciptanya ruang diskusi digital yang lebih sehat, autentik, dan tidak mudah dimanipulasi oleh jaringan terorganisir.", icon: Landmark },
   ];
 
   const techCards = [
@@ -318,8 +318,8 @@ export default function TentangPage() {
             <h2 className="text-[1.1rem] font-bold text-neutral-900 sm:text-[1.4rem] md:text-3xl">Latar Belakang Masalah</h2>
           </div>
           <p className="mb-8 max-w-3xl text-[13px] leading-[1.7] text-neutral-700 md:mb-12 md:text-base">
-            Di era digital, ruang publik media sosial menjadi arena pertarungan narasi.
-            Jaringan terorganisir memanipulasi kolom komentar postingan viral untuk membentuk opini sesuai agenda tertentu.
+            Di era digital, media sosial telah menjadi ruang utama pembentukan opini publik dan diskusi politik.
+            Namun, munculnya Coordinated Inauthentic Behavior (CIB) seperti buzzer terorganisir, spam naratif, dan interaksi tidak autentik menyebabkan manipulasi opini publik serta meningkatkan polarisasi masyarakat di ruang digital Indonesia.
           </p>
           <div ref={problemsRef} className="grid gap-4 md:grid-cols-3 md:gap-6">
             {problems.map((p, i) => {
@@ -364,11 +364,9 @@ export default function TentangPage() {
             <div>
               <h2 className="text-[1.1rem] font-bold text-neutral-900 md:text-2xl">Solusi Kami</h2>
               <p className="mt-3 max-w-3xl text-[13px] leading-[1.7] text-neutral-800 md:mt-4 md:text-base">
-                Sistem ini bukan untuk menghapus konten atau melakukan takedown akun secara paksa,
-                melainkan berfungsi sebagai{" "}
-                <strong className="font-bold" style={{ color: terracotta }}>alat transparansi informasi</strong>{" "}
-                yang memberikan skor dan visualisasi pada pola kolom komentar.
-                Dengan data berbasis fakta, kami mendukung mitigasi sosial dan daya pikir kritis masyarakat.
+                Indobuzztra hadir sebagai sistem analisis transparansi digital yang mendeteksi pola Coordinated Inauthentic Behavior (CIB) pada kolom komentar Instagram melalui semantic clustering dan temporal analysis berbasis AI. Sistem ini tidak melakukan sensor atau penghapusan konten, melainkan{" "}
+                <strong className="font-bold" style={{ color: terracotta }}>membantu mengidentifikasi</strong>{" "}
+                pola interaksi tidak autentik, visualisasi narasi terkoordinasi, dan aktivitas spam secara real-time untuk mendukung literasi digital dan transparansi informasi publik.
               </p>
             </div>
           </div>
@@ -472,7 +470,7 @@ export default function TentangPage() {
             <h2 className="text-[1.1rem] font-bold sm:text-[1.4rem] md:text-3xl" style={{ color: terracotta }}>Kontribusi Sosial</h2>
           </div>
           <p className="mb-8 max-w-3xl text-[13px] leading-[1.7] text-neutral-700 md:mb-10 md:text-base">
-            Komitmen kami terhadap ekosistem digital Indonesia: memperkuat transparansi, literasi, dan partisipasi informasi yang sehat.
+            Komitmen kami dalam mendukung ekosistem digital Indonesia yang lebih sehat, transparan, dan berbasis literasi informasi.
           </p>
           <div ref={contribRef} className="grid gap-4 md:grid-cols-3 md:gap-6">
             {contribution.map((c, i) => {

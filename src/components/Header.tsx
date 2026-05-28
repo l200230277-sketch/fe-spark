@@ -16,14 +16,14 @@ export default function Header() {
   const isFloatingNav = pathname === "/home" || pathname === "/about" || pathname === "/dashboard";
   const navTagline =
     pathname === "/about"
-      ? "Digital Trust Intelligence"
-      : "Digital Trust. Real Impact.";
-  const navCtaLabel = pathname === "/about" ? "Start Analysis" : "Analyze Now";
+      ? "Kecerdasan Kepercayaan Digital"
+      : "Kepercayaan Digital. Dampak Nyata.";
+  const navCtaLabel = pathname === "/about" ? "Mulai Analisis" : "Analisis Sekarang";
 
   const navItems = [
-    { name: "Home", href: "/home" },
+    { name: "Beranda", href: "/home" },
     { name: "Dashboard", href: "/dashboard" },
-    { name: "About", href: "/about" },
+    { name: "Tentang", href: "/about" },
   ];
 
   const toggleMenu = () => setIsOpen(!isOpen);
@@ -36,7 +36,6 @@ export default function Header() {
           className="pointer-events-auto mx-auto flex max-w-6xl items-center justify-between gap-3 rounded-full border bg-white/95 px-4 py-3 shadow-lg backdrop-blur-md md:px-6 md:py-3.5"
           style={{ borderColor: `${sandBeige}aa` }}
         >
-          {/* Logo */}
           <Link
             href="/home"
             className="flex min-w-0 items-center gap-2.5 transition-opacity hover:opacity-85 md:gap-3"
@@ -44,7 +43,7 @@ export default function Header() {
             <div className="relative h-10 w-10 shrink-0 md:h-11 md:w-11">
               <Image
                 src="/logo.png"
-                alt="INDOBUZZTRA Logo"
+                alt="Logo INDOBUZZTRA"
                 fill
                 className="object-contain"
                 priority
@@ -60,7 +59,6 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
           <div className="ml-auto hidden items-center gap-7 md:flex">
             {navItems.map((item) => (
               <Link
@@ -84,7 +82,6 @@ export default function Header() {
             ))}
           </div>
 
-          {/* CTA + Mobile Toggle */}
           <div className="flex shrink-0 items-center gap-2">
             <Link
               href="/home#analisis"
@@ -100,14 +97,13 @@ export default function Header() {
               type="button"
               onClick={toggleMenu}
               className="flex items-center justify-center rounded-full p-2 text-neutral-600 transition-colors hover:bg-neutral-100 md:hidden"
-              aria-label="Toggle menu"
+              aria-label="Buka/tutup menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </nav>
 
-        {/* Mobile Dropdown */}
         {isOpen && (
           <div
             className="pointer-events-auto mx-auto mt-2 max-w-6xl rounded-2xl border bg-white/98 p-4 shadow-lg backdrop-blur-md md:hidden"
@@ -147,7 +143,6 @@ export default function Header() {
     );
   }
 
-  // Non-floating pages: simple white header
   return (
     <header className="border-b bg-white" style={{ borderColor: `${sandBeige}88` }}>
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
@@ -169,7 +164,7 @@ export default function Header() {
           </div>
           <div className="leading-tight">
             <span className="block text-base font-bold text-neutral-900">INDOBUZZTRA</span>
-            <span className="text-[11px] text-neutral-500">Digital Trust. Real Impact.</span>
+            <span className="text-[11px] text-neutral-500">Kepercayaan Digital. Dampak Nyata.</span>
           </div>
         </Link>
 
@@ -198,7 +193,7 @@ export default function Header() {
           type="button"
           onClick={toggleMenu}
           className="flex items-center justify-center p-2 text-neutral-600 transition-colors hover:text-neutral-900 md:hidden"
-          aria-label="Toggle menu"
+          aria-label="Buka/tutup menu"
         >
           {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>

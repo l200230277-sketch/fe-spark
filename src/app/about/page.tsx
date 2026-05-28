@@ -26,7 +26,6 @@ import {
   Code2,
 } from "lucide-react";
 
-// ── Unified warm palette (same tone as Beranda hero throughout) ──
 const terracotta = "#A54141";
 const warmClay   = "#C4876B";
 const sandBeige  = "#D9C49D";
@@ -86,26 +85,26 @@ export default function TentangPage() {
   const methodology = [
     {
       icon: Brain,
-      title: "Semantic Analysis (Lexical/Semantic)",
+      title: "Analisis Semantik (Leksikal/Semantik)",
       accent: terracotta,
       bgIcon: terracotta,
       points: [
-        "Natural language processing to understand the context of comments",
-        "Understanding contextual nuances, slang, and sarcasm",
-        "Detecting narrative similarities (scripts) across comments",
-        "Identifying copy-paste patterns with minor variations",
+        "Pemrosesan bahasa alami untuk memahami konteks komentar",
+        "Memahami nuansa kontekstual, slang, dan sarkasme",
+        "Mendeteksi kesamaan narasi (skrip) antar komentar",
+        "Mengidentifikasi pola copy-paste dengan variasi minor",
       ],
     },
     {
       icon: Clock,
-      title: "Temporal Analysis (Time Patterns)",
+      title: "Analisis Temporal (Pola Waktu)",
       accent: warmClay,
       bgIcon: warmClay,
       points: [
-        "Forensic analysis of comment time metadata",
-        "Detecting irregular activity spikes (burstiness)",
-        "Analyzing posting time synchronization across accounts",
-        "Identifying coordinated attack patterns",
+        "Analisis forensik metadata waktu komentar",
+        "Mendeteksi lonjakan aktivitas tidak wajar (burstiness)",
+        "Menganalisis sinkronisasi waktu posting antar akun",
+        "Mengidentifikasi pola serangan terkoordinasi",
       ],
     },
   ];
@@ -135,10 +134,10 @@ export default function TentangPage() {
   ];
 
   const workflow = [
-    { step: 1, title: "Input Instagram URL",                    icon: ScanSearch    },
-    { step: 2, title: "Scraping Comments",                      icon: MessageCircle },
-    { step: 3, title: "Hybrid Analysis (Semantic + Temporal)", icon: Brain         },
-    { step: 4, title: "CIB Score & Result Visualization",           icon: Shield        },
+    { step: 1, title: "Input URL Instagram",                         icon: ScanSearch    },
+    { step: 2, title: "Scraping Komentar",                           icon: MessageCircle },
+    { step: 3, title: "Analisis Hybrid (Semantik + Temporal)",       icon: Brain         },
+    { step: 4, title: "Skor CIB & Visualisasi Hasil",                icon: Shield        },
   ];
 
   const contribution = [
@@ -148,10 +147,10 @@ export default function TentangPage() {
   ];
 
   const techCards = [
-    { title: "Detection Engine",       items: [{ icon: Link2,     text: "TF-IDF + K-Means (Clustering)" }, { icon: Code2,    text: "Python (Core Engine)" }] },
-    { title: "Backend Infrastructure", items: [{ icon: Flame,     text: "Flask (Backend API)" },           { icon: FileJson, text: "JSON (Data Format)" }] },
-    { title: "Frontend Intelligence",  items: [{ icon: Code2,     text: "Next.js (Frontend Framework)" }] },
-    { title: "Data Visualization",     items: [{ icon: BarChart3, text: "Recharts (Visualization)" }] },
+    { title: "Mesin Deteksi",          items: [{ icon: Link2,     text: "TF-IDF + K-Means (Clustering)" }, { icon: Code2,    text: "Python (Core Engine)" }] },
+    { title: "Infrastruktur Backend",  items: [{ icon: Flame,     text: "Flask (Backend API)" },           { icon: FileJson, text: "JSON (Format Data)" }] },
+    { title: "Antarmuka Frontend",     items: [{ icon: Code2,     text: "Next.js (Framework Frontend)" }] },
+    { title: "Visualisasi Data",       items: [{ icon: BarChart3, text: "Recharts (Visualisasi)" }] },
   ];
 
   type DotItem = { size: number; opacity: number; top?: string; left?: string; right?: string; bottom?: string };
@@ -183,7 +182,6 @@ export default function TentangPage() {
   return (
     <main className="min-h-screen text-neutral-900 antialiased" style={{ backgroundColor: pageBg }}>
 
-      {/* ── HERO ── */}
       <section
         className="relative overflow-hidden pt-28 pb-12 md:pt-40 md:pb-24"
         style={{
@@ -220,7 +218,6 @@ export default function TentangPage() {
 
         <div className="relative mx-auto grid max-w-6xl items-center gap-8 px-5 md:gap-12 md:px-8 lg:grid-cols-[1fr_minmax(0,380px)] lg:gap-16">
           <div>
-            {/* Desktop: pill tags */}
             <div
               className="mb-6 hidden flex-wrap items-center gap-1.5 rounded-full border px-4 py-2 shadow-sm md:inline-flex"
               style={{
@@ -229,7 +226,7 @@ export default function TentangPage() {
                 backdropFilter: "blur(8px)",
               }}
             >
-              {["ETHICAL AI", "SOCIAL DEFENSE", "DIGITAL TRUST"].map((t, i) => (
+              {["AI ETIS", "PERTAHANAN SOSIAL", "KEPERCAYAAN DIGITAL"].map((t, i) => (
                 <Fragment key={t}>
                   {i > 0 && (
                     <span
@@ -248,30 +245,28 @@ export default function TentangPage() {
                 </Fragment>
               ))}
             </div>
-            {/* Mobile: satu paragraf */}
             <p
               className="mb-4 text-[10px] font-bold text-center uppercase tracking-[0.16em] md:hidden"
               style={{ color: terracotta }}
             >
-              Ethical AI · Social Defense · Digital Trust
+              AI Etis · Pertahanan Sosial · Kepercayaan Digital
             </p>
 
             <h1 className="text-[1.9rem] font-bold leading-[1.05] tracking-[-0.03em] text-neutral-900 sm:text-[2.4rem] md:text-5xl lg:text-[3.5rem] lg:leading-[1.12]">
-              Building a More Honest Digital{" "}
-              <span style={{ color: terracotta }}>Space</span>
+              Membangun Ruang Digital{" "}
+              <span style={{ color: terracotta }}>yang Lebih Jujur</span>
             </h1>
             <p className="mt-4 max-w-xl text-[13px] leading-[1.7] text-neutral-700 md:mt-5 md:text-base">
-              INDOBUZZTRA is a web-based verification platform designed to help 
-              detect Coordinated Inauthentic Behavior (CIB) activity in Instagram 
-              comment sections so that public narratives remain accountable.
+              INDOBUZZTRA adalah platform verifikasi berbasis web yang dirancang untuk membantu
+              mendeteksi aktivitas Coordinated Inauthentic Behavior (CIB) di kolom komentar Instagram
+              agar narasi publik tetap dapat dipertanggungjawabkan.
             </p>
 
-            {/* Desktop: pills */}
             <div className="mt-8 hidden flex-wrap gap-2 md:flex">
               {[
-                { label: "Research-Based", icon: BookOpen },
-                { label: "Information Transparency", icon: Target },
-                { label: "For a Healthy Public Space", icon: Users },
+                { label: "Berbasis Riset", icon: BookOpen },
+                { label: "Transparansi Informasi", icon: Target },
+                { label: "Untuk Ruang Publik yang Sehat", icon: Users },
               ].map((p) => {
                 const Icon = p.icon;
                 return (
@@ -286,9 +281,8 @@ export default function TentangPage() {
                 );
               })}
             </div>
-            {/* Mobile: satu paragraf */}
             <p className="mt-4 text-[12px] leading-[1.65] text-center text-neutral-600 md:hidden">
-              Research-Based · Information Transparency · For a Healthy Public Space
+              Berbasis Riset · Transparansi Informasi · Untuk Ruang Publik yang Sehat
             </p>
           </div>
 
@@ -301,7 +295,7 @@ export default function TentangPage() {
                   style={{ background: "rgba(165,65,65,0.55)" }} />
                 <div className="relative flex items-center justify-center"
                   style={{ filter: "drop-shadow(0 20px 45px rgba(165,65,65,0.35))" }}>
-                  <Image src="/logo.png" alt="CIB Detector Logo" width={198} height={198} className="object-contain" priority />
+                  <Image src="/logo.png" alt="Logo CIB Detector" width={198} height={198} className="object-contain" priority />
                 </div>
               </div>
               {dots.map((dot, i) => (
@@ -317,7 +311,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── LATAR BELAKANG MASALAH ── */}
       <section className="border-t py-12 md:py-20" style={{ backgroundColor: pageBg, borderColor: `${sandBeige}88` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <div className="mb-3 flex items-center gap-2.5 md:mb-4 md:gap-3">
@@ -354,7 +347,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── SOLUSI KAMI ── */}
       <section className="px-5 py-10 md:px-8 md:py-20" style={{ backgroundColor: sectionAlt }}>
         <div
           className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl border p-5 shadow-md md:p-10"
@@ -383,16 +375,14 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── METODOLOGI ── */}
       <section className="border-t py-12 md:py-20" style={{ backgroundColor: pageBg, borderColor: `${sandBeige}88` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <div className="mb-3 flex items-center gap-2.5 md:mb-4 md:gap-3">
-            <Shield className="h-6 w-6 shrink-0 md:h-9 md:w-9" style={{ color: terracotta }} />
-            <h2 className="text-[1.1rem] font-bold sm:text-[1.4rem] md:text-3xl" style={{ color: terracotta }}>Detection Methodology</h2>
+            <h2 className="text-[1.1rem] font-bold sm:text-[1.4rem] md:text-3xl" style={{ color: terracotta }}>Metodologi Deteksi</h2>
           </div>
           <p className="mb-8 max-w-3xl text-[13px] leading-[1.7] text-neutral-700 md:mb-10 md:text-base">
-            The hybrid processing engine combines content analysis (semantic/lexical) 
-            and time analysis (temporal) without relying on deep learning models or external databases.
+            Mesin pemrosesan hybrid menggabungkan analisis konten (semantik/leksikal)
+            dan analisis waktu (temporal) tanpa bergantung pada model deep learning atau basis data eksternal.
           </p>
           <div ref={methodRef} className="grid gap-4 md:grid-cols-2 md:gap-6">
             {methodology.map((m, i) => {
@@ -429,14 +419,12 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── ALUR KERJA ── */}
       <section className="border-t py-12 md:py-20" style={{ backgroundColor: sectionAlt, borderColor: `${sandBeige}88` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <h2 className="mb-8 text-center text-[1.1rem] font-bold text-neutral-900 sm:text-[1.4rem] md:mb-12 md:text-3xl">
-            System Workflow
+            Alur Kerja Sistem
           </h2>
 
-          {/* Mobile: satu paragraf alur */}
           <div className="mx-auto flex max-w-xs flex-col gap-3 text-center md:hidden">
             {workflow.map((w) => (
               <div
@@ -445,9 +433,8 @@ export default function TentangPage() {
                 style={{ borderColor: `${sandBeige}88` }}
               >
                 <p className="text-[11px] font-bold text-[#A54141]">
-                  Step {w.step}
+                  Langkah {w.step}
                 </p>
-
                 <p className="mt-1 text-[12px] font-medium leading-[1.6] text-neutral-800">
                   {w.title}
                 </p>
@@ -455,7 +442,6 @@ export default function TentangPage() {
             ))}
           </div>
 
-          {/* Desktop: ikon horizontal */}
           <div className="hidden items-start md:flex">
             {workflow.map((w) => {
               const Icon = w.icon;
@@ -479,7 +465,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── KONTRIBUSI SOSIAL ── */}
       <section className="border-t py-12 md:py-20" style={{ backgroundColor: pageBg, borderColor: `${sandBeige}88` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <div className="mb-3 flex items-center gap-2.5 md:mb-4 md:gap-3">
@@ -518,15 +503,13 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── TEKNOLOGI ── */}
       <section className="border-t py-12 md:py-20" style={{ backgroundColor: sectionAlt, borderColor: `${sandBeige}88` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <div className="mb-3 flex items-center gap-2.5 md:mb-4 md:gap-3">
-            <Shield className="h-6 w-6 shrink-0 md:h-8 md:w-8" style={{ color: terracotta }} strokeWidth={1.5} />
-            <h2 className="text-[1.1rem] font-bold text-neutral-900 sm:text-[1.4rem] md:text-3xl">Technology Used</h2>
+            <h2 className="text-[1.1rem] font-bold text-neutral-900 sm:text-[1.4rem] md:text-3xl">Teknologi yang Digunakan</h2>
           </div>
           <p className="mb-6 max-w-2xl text-[13px] leading-[1.7] text-neutral-600 md:mb-10 md:text-base">
-            Stack that is chosen for fast iteration, algorithm transparency, and easy-to-read result visualization.
+            Stack yang dipilih untuk iterasi cepat, transparansi algoritma, dan visualisasi hasil yang mudah dibaca.
           </p>
           <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
             {techCards.map((card) => (
@@ -550,7 +533,6 @@ export default function TentangPage() {
         </div>
       </section>
 
-      {/* ── CTA ── */}
       <section className="px-5 py-10 md:px-8 md:py-20" style={{ backgroundColor: pageBg }}>
         <div
           className="relative mx-auto max-w-6xl overflow-hidden rounded-2xl px-5 py-8 shadow-xl md:rounded-3xl md:px-12 md:py-14"
@@ -562,10 +544,10 @@ export default function TentangPage() {
                 <ShieldCheck className="h-7 w-7 text-white md:h-10 md:w-10" strokeWidth={1.5} />
               </div>
               <div>
-                <h2 className="text-[1.1rem] font-bold text-white sm:text-[1.4rem] md:text-3xl">Protect Digital Discourse Together</h2>
+                <h2 className="text-[1.1rem] font-bold text-white sm:text-[1.4rem] md:text-3xl">Lindungi Ruang Digital Bersama</h2>
                 <p className="mt-2 max-w-xl text-[12px] leading-[1.65] text-white/90 md:mt-3 md:text-base">
-                  Start analyzing an Instagram post URL and view pattern 
-                  summaries that help you assess the credibility of the comment section.
+                  Mulai analisis URL postingan Instagram dan lihat ringkasan pola
+                  yang membantu kamu menilai kredibilitas kolom komentar.
                 </p>
               </div>
             </div>
@@ -574,14 +556,13 @@ export default function TentangPage() {
               className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-[13px] font-bold text-neutral-900 shadow-lg transition hover:brightness-105 sm:w-auto md:px-7 md:py-3.5 md:text-base"
               style={{ backgroundColor: pageBg }}
             >
-              Start Analysis Now
+              Mulai Analisis Sekarang
               <ArrowRight className="h-4 w-4 md:h-5 md:w-5" />
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
       <footer className="border-t py-6 md:py-10" style={{ borderColor: `${warmClay}33`, backgroundColor: sandBeige }}>
         <div className="mx-auto grid max-w-6xl gap-5 px-5 sm:grid-cols-2 md:px-8 lg:grid-cols-4 lg:gap-6">
           <div className="sm:col-span-2 lg:col-span-1">
@@ -590,31 +571,31 @@ export default function TentangPage() {
               <Activity className="h-4 w-4 text-white md:h-5 md:w-5" strokeWidth={2} />
             </div>
             <p className="text-[11px] leading-[1.6] text-neutral-800 md:text-xs">
-              A healthier digital ecosystem through behavioral signal transparency and AI ethics.
+              Ekosistem digital yang lebih sehat melalui transparansi sinyal perilaku dan etika AI.
             </p>
           </div>
           <div>
-            <h3 className="text-[11px] font-bold text-neutral-900 md:text-xs">Data Transparency</h3>
+            <h3 className="text-[11px] font-bold text-neutral-900 md:text-xs">Transparansi Data</h3>
             <p className="mt-1 text-[11px] leading-[1.55] text-neutral-700 md:text-xs">
-              Audit-friendly statistical methodology; ML ethics &amp; result interpretability.
+              Metodologi statistik yang ramah audit; etika ML &amp; interpretabilitas hasil.
             </p>
           </div>
           <div>
-            <h3 className="text-[11px] font-bold text-neutral-900 md:text-xs">Security &amp; Privacy</h3>
+            <h3 className="text-[11px] font-bold text-neutral-900 md:text-xs">Keamanan &amp; Privasi</h3>
             <p className="mt-1 text-[11px] leading-[1.55] text-neutral-700 md:text-xs">
-              Without storing permanent comments; focusing on aggregate patterns, not identities.
+              Tanpa menyimpan komentar secara permanen; berfokus pada pola agregat, bukan identitas.
             </p>
           </div>
           <div className="rounded-xl border p-3 sm:col-span-2 lg:col-span-1 lg:p-4"
             style={{ borderColor: `${terracotta}33`, backgroundColor: "rgba(246,235,221,0.8)" }}>
-            <p className="text-[11px] font-bold md:text-xs" style={{ color: terracotta }}>AI for Good</p>
+            <p className="text-[11px] font-bold md:text-xs" style={{ color: terracotta }}>AI untuk Kebaikan</p>
             <p className="mt-1 text-[10px] leading-[1.5] text-neutral-700 md:text-[11px]">
-              Digital Discourse Protection — a constructive public discussion space.
+              Perlindungan Diskursus Digital — ruang diskusi publik yang konstruktif.
             </p>
           </div>
         </div>
         <p className="mt-5 text-center text-[10px] text-neutral-600 md:mt-8 md:text-xs">
-          © 2026 CIB Detector. All rights reserved.
+          © 2026 CIB Detector. Seluruh hak cipta dilindungi.
         </p>
       </footer>
     </main>

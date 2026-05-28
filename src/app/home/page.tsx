@@ -28,7 +28,6 @@ const warmClay = "#C4876B";
 const sandBeige = "#D9C49D";
 const softIvory = "#F5F0DC";
 
-// ── Hook: trigger once when element enters viewport ───────────────────────────
 function useInView(threshold = 0.2) {
   const ref = useRef<HTMLDivElement>(null);
   const [inView, setInView] = useState(false);
@@ -50,7 +49,6 @@ function useInView(threshold = 0.2) {
   return { ref, inView };
 }
 
-// ── Hook: count-up from 0 to target ──────────────────────────────────────────
 function useCountUp(target: number, duration = 1100, active = false) {
   const [value, setValue] = useState(0);
   useEffect(() => {
@@ -59,7 +57,7 @@ function useCountUp(target: number, duration = 1100, active = false) {
     const step = (ts: number) => {
       if (!start) start = ts;
       const progress = Math.min((ts - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3);
       setValue(Math.floor(eased * target));
       if (progress < 1) requestAnimationFrame(step);
       else setValue(target);
@@ -69,7 +67,6 @@ function useCountUp(target: number, duration = 1100, active = false) {
   return value;
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 type StatItem = {
   numericValue: number;
   suffix: string;
@@ -80,16 +77,14 @@ type StatItem = {
 
 type TechItem = { icon: React.ElementType; title: string; description: string };
 
-// ── Helper: format large numbers ──────────────────────────────────────────────
 function fmtCount(raw: number, suffix: string): string {
   if (suffix === "+") {
-    if (raw >= 1_000_000) return `${(raw / 1_000_000).toFixed(1)}M`;
-    if (raw >= 1_000) return `${Math.floor(raw / 1_000)}K`;
+    if (raw >= 1_000_000) return `${(raw / 1_000_000).toFixed(1)}J`;
+    if (raw >= 1_000) return `${Math.floor(raw / 1_000)}RB`;
   }
   return raw.toString();
 }
 
-// ── Stat card (float-up + count-up) ──────────────────────────────────────────
 function StatCard({ stat, index, active }: { stat: StatItem; index: number; active: boolean }) {
   const count = useCountUp(stat.numericValue, 1100, active);
   const Icon = stat.icon;
@@ -128,7 +123,6 @@ function StatCard({ stat, index, active }: { stat: StatItem; index: number; acti
   );
 }
 
-// ── Tech step card (float-up) ─────────────────────────────────────────────────
 function TechStepCard({ step, index, isLast, active }: { step: TechItem; index: number; isLast: boolean; active: boolean }) {
   const Icon = step.icon;
   return (
@@ -155,7 +149,6 @@ function TechStepCard({ step, index, isLast, active }: { step: TechItem; index: 
   );
 }
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export default function HomePage() {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -167,12 +160,12 @@ export default function HomePage() {
 
   const handleAnalysis = async () => {
     if (!url.trim()) {
-      setError("Please enter a valid Instagram URL.");
+      setError("Silakan masukkan URL Instagram yang valid.");
       return;
     }
     const instagramUrlPattern = /^https?:\/\/(www\.)?instagram\.com\/p\/[\w-]+\/?/;
     if (!instagramUrlPattern.test(url)) {
-      setError("The URL format is not valid. For example: https://www.instagram.com/p/ABC123xyz/");
+      setError("Format URL tidak valid. Contoh: https://www.instagram.com/p/ABC123xyz/");
       return;
     }
     setLoading(true);
@@ -182,7 +175,7 @@ export default function HomePage() {
       localStorage.setItem("latest_analysis", JSON.stringify(result));
       router.push("/dashboard");
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "An error occurred while analyzing. Please try again.";
+      const message = err instanceof Error ? err.message : "Terjadi kesalahan saat menganalisis. Silakan coba lagi.";
       setError(message);
     } finally {
       setLoading(false);
@@ -190,22 +183,21 @@ export default function HomePage() {
   };
 
   const stats: StatItem[] = [
-    { numericValue: 1200000, suffix: "+", label: "Comments Analyzed", description: "From thousands of public Instagram posts.", icon: MessageCircle },
-    { numericValue: 50000, suffix: "+", label: "Accounts Detected", description: "Potential accounts involved in CIB activities.", icon: Users },
-    { numericValue: 89, suffix: "%", label: "Model Accuracy", description: "Our AI model is trained on high-quality data.", icon: Crosshair },
+    { numericValue: 1200000, suffix: "+", label: "Komentar Dianalisis", description: "Dari ribuan postingan publik Instagram.", icon: MessageCircle },
+    { numericValue: 50000, suffix: "+", label: "Akun Terdeteksi", description: "Akun yang diduga terlibat dalam aktivitas CIB.", icon: Users },
+    { numericValue: 89, suffix: "%", label: "Akurasi Model", description: "Model AI kami dilatih dengan data berkualitas tinggi.", icon: Crosshair },
   ];
 
   const techSteps: TechItem[] = [
-    { icon: Network, title: "Behavioral Analysis", description: "Detecting unusual behavioral patterns in comments." },
-    { icon: Clock, title: "Temporal Analysis", description: "Analyzing the timing and frequency of comments in depth." },
-    { icon: Brain, title: "Machine Learning", description: "Adaptive AI model with continuous learning for accurate results." },
-    { icon: ShieldCheck, title: "Coordination Detection", description: "Identifying networks of accounts that work together." },
+    { icon: Network, title: "Analisis Perilaku", description: "Mendeteksi pola perilaku tidak wajar dalam komentar." },
+    { icon: Clock, title: "Analisis Temporal", description: "Menganalisis waktu dan frekuensi komentar secara mendalam." },
+    { icon: Brain, title: "Machine Learning", description: "Model AI adaptif dengan pembelajaran berkelanjutan untuk hasil yang akurat." },
+    { icon: ShieldCheck, title: "Deteksi Koordinasi", description: "Mengidentifikasi jaringan akun yang bekerja sama secara terkoordinasi." },
   ];
 
   return (
     <main className="min-h-screen text-neutral-900 antialiased">
 
-      {/* ── HERO ─────────────────────────────────────────────── */}
       <section
         className="relative overflow-hidden"
         style={{
@@ -238,7 +230,6 @@ export default function HomePage() {
         <div className="relative mx-auto max-w-6xl px-5 pb-14 pt-28 md:px-8 md:pb-20 md:pt-32">
           <div className="grid items-center gap-6 lg:grid-cols-[1.4fr_0.6fr]">
 
-            {/* Left copy */}
             <div className="max-w-[900px] pt-2">
               <div
                 className="mb-6 inline-flex items-center gap-2 rounded-full border px-5 py-2 shadow-sm"
@@ -268,7 +259,7 @@ export default function HomePage() {
                     md:tracking-[0.22em]
                   "
                 >
-                  AI-Powered · Ethical · Trusted
+                  Bertenaga AI · Etis · Terpercaya
                 </span>
               </div>
               <h1
@@ -285,11 +276,11 @@ export default function HomePage() {
                   lg:text-[3.6rem]
                 "
               >
-                Protect the Digital Space
+                Lindungi Ruang Digital
                 <br />
-                from{" "}
+                dari{" "}
                 <span className="text-[#C85245]">
-                  Opinion Manipulation
+                  Manipulasi Opini
                 </span>
               </h1>
               <p
@@ -304,19 +295,17 @@ export default function HomePage() {
                   lg:text-[18px]
                 "
               >
-                INDOBUZZTRA uses artificial intelligence and temporal analysis 
-                to accurately and responsibly detect Coordinated Inauthentic Behavior 
-                (CIB) activity in Instagram comments.
+                INDOBUZZTRA menggunakan kecerdasan buatan dan analisis temporal 
+                untuk mendeteksi aktivitas Coordinated Inauthentic Behavior (CIB) 
+                pada komentar Instagram secara akurat dan bertanggung jawab.
               </p>
             </div>
 
-            {/* Right shield illustration */}
             <div className="flex items-center justify-center lg:justify-end">
               <div className="relative h-[300px] w-[300px] md:h-[360px] md:w-[360px]">
                 <div className="absolute inset-0 rounded-full opacity-20 blur-2xl"
                   style={{ background: `radial-gradient(circle, ${terracotta}, transparent 70%)` }} />
 
-                {/* Bubble left */}
                 <div className="absolute left-0 top-14 flex items-center gap-2 rounded-xl border bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm"
                   style={{ borderColor: `${sandBeige}88` }}>
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${sandBeige}99` }}>
@@ -328,7 +317,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Bubble top-right */}
                 <div className="absolute right-4 top-6 flex items-center gap-2 rounded-xl border bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm"
                   style={{ borderColor: `${sandBeige}88` }}>
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${sandBeige}99` }}>
@@ -340,7 +328,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Bubble bottom-right */}
                 <div className="absolute bottom-20 right-0 flex items-center gap-2 rounded-xl border bg-white/90 px-3 py-2 shadow-md backdrop-blur-sm"
                   style={{ borderColor: `${sandBeige}88` }}>
                   <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${sandBeige}99` }}>
@@ -352,7 +339,6 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Center shield */}
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div
                     className="absolute bottom-12 h-20 w-40 rounded-full opacity-40 blur-2xl"
@@ -368,7 +354,7 @@ export default function HomePage() {
                   >
                     <Image
                       src="/logo.png"
-                      alt="CIB Detector Logo"
+                      alt="Logo CIB Detector"
                       width={198}
                       height={198}
                       className="object-contain"
@@ -377,32 +363,25 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Dots */}
                 {[
                   { top: "12%", left: "8%", size: 4, opacity: 0.25 },
                   { top: "18%", left: "20%", size: 6, opacity: 0.4 },
                   { top: "28%", left: "5%", size: 5, opacity: 0.35 },
-
                   { top: "14%", right: "12%", size: 7, opacity: 0.3 },
                   { top: "26%", right: "4%", size: 5, opacity: 0.45 },
                   { top: "36%", right: "14%", size: 4, opacity: 0.25 },
-
                   { top: "44%", left: "2%", size: 6, opacity: 0.35 },
                   { top: "52%", left: "12%", size: 3, opacity: 0.2 },
                   { top: "60%", left: "6%", size: 5, opacity: 0.3 },
-
                   { top: "48%", right: "2%", size: 6, opacity: 0.4 },
                   { top: "58%", right: "10%", size: 4, opacity: 0.25 },
                   { top: "68%", right: "6%", size: 7, opacity: 0.35 },
-
                   { bottom: "18%", left: "18%", size: 5, opacity: 0.25 },
                   { bottom: "10%", left: "30%", size: 8, opacity: 0.2 },
                   { bottom: "22%", left: "42%", size: 4, opacity: 0.35 },
-
                   { bottom: "14%", right: "18%", size: 5, opacity: 0.3 },
                   { bottom: "8%", right: "30%", size: 3, opacity: 0.2 },
                   { bottom: "20%", right: "40%", size: 6, opacity: 0.4 },
-
                   { top: "40%", left: "26%", size: 3, opacity: 0.25 },
                   { top: "34%", right: "28%", size: 5, opacity: 0.3 },
                   { bottom: "34%", left: "24%", size: 7, opacity: 0.2 },
@@ -432,7 +411,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Search bar */}
           <div id="analisis" className="mx-auto mt-12 max-w-3xl scroll-mt-28">
             <div
               className="flex flex-col gap-3 rounded-2xl border bg-white/95 p-3 shadow-lg backdrop-blur-sm sm:flex-row sm:items-center sm:gap-2 sm:rounded-full sm:py-2 sm:pl-5 sm:pr-2"
@@ -445,7 +423,7 @@ export default function HomePage() {
                   value={url}
                   onChange={(e) => { setUrl(e.target.value); setError(""); }}
                   onKeyDown={(e) => e.key === "Enter" && !loading && handleAnalysis()}
-                  placeholder="Paste an Instagram URL to analyze..."
+                  placeholder="Tempel URL Instagram untuk dianalisis..."
                   disabled={loading}
                   className="min-w-0 flex-1 bg-transparent py-2 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:outline-none disabled:opacity-50 md:text-[15px]"
                 />
@@ -459,8 +437,8 @@ export default function HomePage() {
                   style={{ background: `linear-gradient(135deg, #C4504A, #8e3030)`, boxShadow: `0 4px 16px rgba(165,65,65,0.4)` }}
                 >
                   {loading
-                    ? <><Loader2 className="h-5 w-5 animate-spin" />“Analyzing...</>
-                    : <><Search className="h-5 w-5" />Start Analysis</>
+                    ? <><Loader2 className="h-5 w-5 animate-spin" />Menganalisis...</>
+                    : <><Search className="h-5 w-5" />Mulai Analisis</>
                   }
                 </button>
               </div>
@@ -474,120 +452,115 @@ export default function HomePage() {
             )}
             <p className="mt-4 flex items-center justify-center gap-2 text-center text-xs text-[#5F4A45] md:text-sm">
               <ShieldCheck className="h-4 w-4 text-[#9E3D3D]" />
-              Secure, Private, and We Don’t Store Your Comments.
+              Aman, Privat, dan Kami Tidak Menyimpan Komentar Anda.
             </p>
           </div>
 
-          {/* ── Feature bar ───────────────────────────────────── */}
-            <div
-              className="
-                mx-auto
-                mt-8
-                max-w-5xl
-                rounded-2xl
-                border
-                bg-white/75
-                px-4
-                py-4
-                shadow-md
-                backdrop-blur-sm
-                md:mt-10
-                md:flex
-                md:flex-row
-                md:items-center
-                md:justify-between
-                md:rounded-[26px]
-                md:px-10
-                md:py-7
-              "
-              style={{
-                borderColor: "rgba(217,196,157,0.45)",
-              }}
-            >
-              {/* Item utama */}
-              <div className="flex items-center gap-3 md:min-w-[320px] md:gap-4">
-                <div
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl md:h-14 md:w-14 md:rounded-2xl"
-                  style={{
-                    background: "rgba(217,196,157,0.28)",
-                  }}
-                >
-                  <Image
-                    src="/logo.png"
-                    alt="Logo"
-                    width={24}
-                    height={24}
-                    className="object-contain md:hidden"
-                  />
-                  <Image
-                    src="/logo.png"
-                    alt="Logo"
-                    width={32}
-                    height={32}
-                    className="hidden object-contain md:block"
-                  />
-                </div>
+          <div
+            className="
+              mx-auto
+              mt-8
+              max-w-5xl
+              rounded-2xl
+              border
+              bg-white/75
+              px-4
+              py-4
+              shadow-md
+              backdrop-blur-sm
+              md:mt-10
+              md:flex
+              md:flex-row
+              md:items-center
+              md:justify-between
+              md:rounded-[26px]
+              md:px-10
+              md:py-7
+            "
+            style={{
+              borderColor: "rgba(217,196,157,0.45)",
+            }}
+          >
+            <div className="flex items-center gap-3 md:min-w-[320px] md:gap-4">
+              <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl md:h-14 md:w-14 md:rounded-2xl"
+                style={{
+                  background: "rgba(217,196,157,0.28)",
+                }}
+              >
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={24}
+                  height={24}
+                  className="object-contain md:hidden"
+                />
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={32}
+                  height={32}
+                  className="hidden object-contain md:block"
+                />
+              </div>
 
-                <div className="min-w-0 leading-snug">
-                  <p className="text-[12px] text-[#7A6A63] md:text-[15px]">
-                    Built for
-                  </p>
-                  <p className="text-[14px] font-semibold text-[#4A2D29] md:text-[18px]">
-                    a Healthy Digital Space
+              <div className="min-w-0 leading-snug">
+                <p className="text-[12px] text-[#7A6A63] md:text-[15px]">
+                  Dibangun untuk
+                </p>
+                <p className="text-[14px] font-semibold text-[#4A2D29] md:text-[18px]">
+                  Ruang Digital yang Sehat
+                </p>
+              </div>
+            </div>
+
+            <p className="mt-3 border-t pt-3 text-[12px] text-center leading-[1.65] text-[#7A6A63] md:hidden"
+              style={{ borderColor: "rgba(217,196,157,0.45)" }}>
+              Berbasis Riset &amp; Akademik · Transparan &amp; Akuntabel · Privasi Pengguna Diutamakan
+            </p>
+
+            <div className="hidden md:flex md:items-center md:gap-10">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-5 w-5 text-[#B84E43]" />
+                <div className="leading-snug">
+                  <p className="text-[14px] text-[#7A6A63]">
+                    Berbasis Riset <br />
+                    &amp; Akademik
                   </p>
                 </div>
               </div>
-
-              {/* MOBILE: satu paragraf ringkas */}
-              <p className="mt-3 border-t pt-3 text-[12px] text-center leading-[1.65] text-[#7A6A63] md:hidden"
-                style={{ borderColor: "rgba(217,196,157,0.45)" }}>
-                Research &amp; Academic-Based · Transparent &amp; Accountable · User Privacy Prioritized
-              </p>
-
-              {/* DESKTOP: layout horizontal */}
-              <div className="hidden md:flex md:items-center md:gap-10">
-                <div className="flex items-center gap-3">
-                  <BookOpen className="h-5 w-5 text-[#B84E43]" />
-                  <div className="leading-snug">
-                    <p className="text-[14px] text-[#7A6A63]">
-                      Research <br />
-                      &amp; Academic-Based
-                    </p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <Scale className="h-5 w-5 text-[#B84E43]" />
+                <div className="leading-snug">
+                  <p className="text-[14px] text-[#7A6A63]">
+                    Transparan <br />
+                    &amp; Akuntabel
+                  </p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Scale className="h-5 w-5 text-[#B84E43]" />
-                  <div className="leading-snug">
-                    <p className="text-[14px] text-[#7A6A63]">
-                      Transparent <br />
-                      &amp; Accountable
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <UserRound className="h-5 w-5 text-[#B84E43]" />
-                  <div className="leading-snug">
-                    <p className="text-[14px] text-[#7A6A63]">
-                      User Privacy <br />
-                      Prioritized
-                    </p>
-                  </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <UserRound className="h-5 w-5 text-[#B84E43]" />
+                <div className="leading-snug">
+                  <p className="text-[14px] text-[#7A6A63]">
+                    Privasi Pengguna <br />
+                    Diutamakan
+                  </p>
                 </div>
               </div>
             </div>
           </div>
+        </div>
       </section>
 
-      {/* ── DAMPAK NYATA — ANIMASI 2: float-up + count-up ────── */}
       <section className="border-t py-12 md:py-24" style={{ backgroundColor: softIvory, borderColor: `${sandBeige}77` }}>
         <div className="mx-auto max-w-6xl px-5 md:px-8">
           <p
             className="text-center font-bold uppercase text-[10px] tracking-[0.18em] sm:text-[11px] md:text-base md:tracking-[0.28em]" style={{ color: terracotta }}>
-            Real Impact
+            Dampak Nyata
           </p>
           <h2 className="relative mt-3 text-center text-[1.1rem] font-bold leading-[1.25] text-neutral-900 sm:text-[1.4rem] md:text-[2rem] lg:text-4xl">
             <span className="whitespace-nowrap">
-              Numbers that Reflect Trust
+              Angka yang Mencerminkan Kepercayaan
             </span>
 
             <span
@@ -625,26 +598,25 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── TEKNOLOGI — ANIMASI 3: float-up cards ────────────── */}
       <section className="py-12 md:py-24" style={{ backgroundColor: sandBeige }}>
         <div className="mx-auto grid max-w-6xl items-center gap-8 px-5 md:gap-12 md:px-8 lg:grid-cols-2 lg:gap-16">
           <div>
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] md:text-xs md:tracking-[0.28em]" style={{ color: terracotta }}>
-              The Technology Behind It
+              Teknologi di Baliknya
             </p>
             <h2 className="mt-2 text-[1.1rem] font-extrabold leading-tight text-neutral-900 sm:text-[1.4rem] md:mt-3 md:text-4xl">
-              AI that Works<br />with Integrity
+              AI yang Bekerja<br />dengan Integritas
             </h2>
             <p className="mt-4 max-w-md text-[13px] leading-[1.7] text-neutral-700 md:mt-5 md:text-[15px]">
-              INDOBUZZTRA combines machine learning, behavioral analysis, 
-              and temporal patterns to intelligently identify opinion manipulation.
+              INDOBUZZTRA menggabungkan machine learning, analisis perilaku, 
+              dan pola temporal untuk mengidentifikasi manipulasi opini secara cerdas.
             </p>
             <Link
               href="/about"
               className="mt-6 inline-flex items-center gap-1.5 rounded-xl border-2 px-5 py-2.5 text-[13px] font-semibold transition hover:bg-white/50 md:mt-8 md:px-6 md:py-3 md:text-sm"
               style={{ borderColor: terracotta, color: terracotta }}
             >
-              Learn More
+              Pelajari Lebih Lanjut
               <ChevronRight className="h-4 w-4" />
             </Link>
           </div>

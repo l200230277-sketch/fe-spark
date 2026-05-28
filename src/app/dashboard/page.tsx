@@ -28,6 +28,7 @@ import {
   Activity,
   Lightbulb,
 } from "lucide-react";
+import page from "../home/page";
 
 interface AnalysisResult {
   post_id?: string;
@@ -658,10 +659,22 @@ export default function DashboardPage() {
   const [filterLabel, setFilterLabel] = useState<string>("all");
   const [accountFilter, setAccountFilter] = useState<string>("all");
   const [showAllClusters, setShowAllClusters] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const CLUSTERS_PER_PAGE = 10;
+  const [accountCurrentPage, setAccountCurrentPage] = useState(1);
+  const ACCOUNTS_PER_PAGE = 10;
 
   useEffect(() => {
     loadAnalysisResult();
   }, []);
+
+  useEffect(() => { 
+    setCurrentPage(1); 
+  }, [filterLabel, clusterSearch]);
+
+  useEffect(() => {
+  setAccountCurrentPage(1);
+}, [accountFilter, accountSearch]);
 
   const loadAnalysisResult = () => {
     try {
@@ -687,6 +700,14 @@ export default function DashboardPage() {
         filterLabel === "all" || normalizeSpamLabel(cluster.spam_label) === filterLabel;
       return matchesSearch && matchesFilter;
     }) || [];
+  const totalPages = Math.ceil( 
+    filteredClusters.length / CLUSTERS_PER_PAGE 
+  ); 
+  
+  const paginatedClusters = filteredClusters.slice(
+    (currentPage - 1) * CLUSTERS_PER_PAGE, 
+    currentPage * CLUSTERS_PER_PAGE 
+  );
 
   const filteredAccounts =
     result?.suspicious_accounts?.filter((account) => {
@@ -705,6 +726,15 @@ export default function DashboardPage() {
 
       return matchesSearch && matchesFilter;
     }) || [];
+
+    const totalAccountPages = Math.ceil(
+  filteredAccounts.length / ACCOUNTS_PER_PAGE
+);
+
+const paginatedAccounts = filteredAccounts.slice(
+  (accountCurrentPage - 1) * ACCOUNTS_PER_PAGE,
+  accountCurrentPage * ACCOUNTS_PER_PAGE
+);
 
   if (loading) {
     return (
@@ -1053,8 +1083,8 @@ export default function DashboardPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
-                  {filteredAccounts.length > 0 ? (
-                    filteredAccounts.map((account, index) => (
+                  {paginatedAccounts.length > 0 ? (
+                    paginatedAccounts.map((account, index) => (
                       <tr
                         key={index}
                         className="hover:bg-stone-50/50 transition-colors"
@@ -1109,6 +1139,59 @@ export default function DashboardPage() {
                 </tbody>
               </table>
             </div>
+            {totalAccountPages > 1 && (
+  <div className="flex items-center justify-center gap-3 mt-6">
+
+    <button
+      onClick={() =>
+        setAccountCurrentPage((prev) => Math.max(prev - 1, 1))
+      }
+      disabled={accountCurrentPage === 1}
+      className={`px-5 py-2.5 rounded-xl border text-sm font-bold transition-all duration-200 ${
+        accountCurrentPage === 1
+          ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
+          : "bg-white hover:bg-stone-50 text-stone-700 border-stone-300"
+      }`}
+    >
+      Previous
+    </button>
+
+    <div className="flex items-center gap-2">
+      {[accountCurrentPage, accountCurrentPage + 1]
+        .filter((page) => page <= totalAccountPages)
+        .map((page) => (
+          <button
+            key={page}
+            onClick={() => setAccountCurrentPage(page)}
+            className={`w-12 h-12 rounded-xl text-sm font-extrabold transition-all duration-200 border ${
+              accountCurrentPage === page
+                ? "bg-[#A54141] text-white border-[#A54141] shadow-md"
+                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+    </div>
+
+    <button
+      onClick={() =>
+        setAccountCurrentPage((prev) =>
+          Math.min(prev + 1, totalAccountPages)
+        )
+      }
+      disabled={accountCurrentPage === totalAccountPages}
+      className={`px-5 py-2.5 rounded-xl border text-sm font-bold transition-all duration-200 ${
+        accountCurrentPage === totalAccountPages
+          ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
+          : "bg-white hover:bg-stone-50 text-stone-700 border-stone-300"
+      }`}
+    >
+      Next
+    </button>
+
+  </div>
+)}
           </div>
 
         <div id="cluster-section" className="space-y-4">
@@ -1124,13 +1207,13 @@ export default function DashboardPage() {
             >
               <option value="all">Semua Kategori</option>
               <option value="spam">Spam</option>
-              <option value="suspicious">Mencurigakan</option>
+              <option value="suspicious">Suspicious</option>
               <option value="normal">Normal</option>
             </select>
           </div>
 
-          {filteredClusters.length > 0 ? (
-            filteredClusters.map((cluster) => (
+          {paginatedClusters.length > 0 ? (
+            paginatedClusters.map((cluster) => (
               <ClusterCard
                 key={cluster.cluster_id}
                 cluster={cluster}
@@ -1147,6 +1230,59 @@ export default function DashboardPage() {
               No cluster data found for selected filter
             </div>
           )}
+          {totalPages > 1 && (
+  <div className="flex items-center justify-center gap-3 mt-6">
+
+    <button
+      onClick={() =>
+        setCurrentPage((prev) => Math.max(prev - 1, 1))
+      }
+      disabled={currentPage === 1}
+      className={`px-5 py-2.5 rounded-xl border text-sm font-bold transition-all duration-200 ${
+        currentPage === 1
+          ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
+          : "bg-white hover:bg-stone-50 text-stone-700 border-stone-300"
+      }`}
+    >
+      Previous
+    </button>
+
+    <div className="flex items-center gap-2">
+      {[currentPage, currentPage + 1]
+        .filter((page) => page <= totalPages)
+        .map((page) => (
+          <button
+            key={page}
+            onClick={() => setCurrentPage(page)}
+            className={`w-12 h-12 rounded-xl text-sm font-extrabold transition-all duration-200 border ${
+              currentPage === page
+                ? "bg-[#A54141] text-white border-[#A54141] shadow-md"
+                : "bg-white text-stone-700 border-stone-200 hover:bg-stone-50"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+    </div>
+
+    <button
+      onClick={() =>
+        setCurrentPage((prev) =>
+          Math.min(prev + 1, totalPages)
+        )
+      }
+      disabled={currentPage === totalPages}
+      className={`px-5 py-2.5 rounded-xl border text-sm font-bold transition-all duration-200 ${
+        currentPage === totalPages
+          ? "bg-stone-100 text-stone-400 border-stone-200 cursor-not-allowed"
+          : "bg-white hover:bg-stone-50 text-stone-700 border-stone-300"
+      }`}
+    >
+      Next
+    </button>
+
+  </div>
+)}
         </div>
       </div>
     </main>

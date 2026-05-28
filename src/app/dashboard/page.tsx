@@ -41,7 +41,7 @@ interface AnalysisResult {
   temporal_analysis: Array<{ tanggal: string; jumlah_komentar: number }>;
   suspicious_accounts: Array<{
     username: string;
-    risk_score: "High" | "Medium" | "Low";
+    risk_score: "Tinggi" | "Sedang" | "Rendah";
     cluster_behavior: string;
     comment_count: number;
     pattern: string;
@@ -170,7 +170,7 @@ const GaugeChart = ({ value, label }: { value: number; label: string }) => {
       </div>
       <div className="mt-5 text-center">
         <span className="text-base px-4 py-1.5 bg-[#A54141]/10 text-[#A54141] rounded-full font-bold">
-          Moderate Risk
+          Risiko Sedang
         </span>
         <p className="text-base text-stone-500 mt-4 max-w-[220px] leading-relaxed">{label}</p>
       </div>
@@ -191,31 +191,31 @@ const GaugeChart = ({ value, label }: { value: number; label: string }) => {
 }) => {
   const clusterConfigs = [
   {
-    label: "Cluster A",
+    label: "Kluster A",
     color: "#A9471F",
     count: 29,
     center: { x: 130, y: 110 },
   },
   {
-    label: "Cluster B",
+    label: "Kluster  B",
     color: "#FF6B81",
     count: 28,
     center: { x: 375, y: 90 },
   },
   {
-    label: "Cluster C",
+    label: "Kluster C",
     color: "#E39B11",
     count: 27,
     center: { x: 70, y: 285 },
   },
   {
-    label: "Cluster D",
+    label: "Kluster D",
     color: "#FFAE1A",
     count: 23,
     center: { x: 235, y: 320 },
   },
   {
-    label: "Cluster E",
+    label: "Kluster E",
     color: "#DCC29E",
     count: 17,
     center: { x: 385, y: 270 },
@@ -350,7 +350,7 @@ const GaugeChart = ({ value, label }: { value: number; label: string }) => {
               </div>
 
               <span className="text-sm text-stone-400 font-medium">
-                {cluster.count} account
+                {cluster.count} akun
               </span>
             </div>
           ))}
@@ -367,7 +367,7 @@ const GaugeChart = ({ value, label }: { value: number; label: string }) => {
             }}
             className="w-full mt-6 border border-[#D7A98C] text-[#9A4B3B] font-semibold rounded-xl py-3 hover:bg-[#FFF4EC] transition-all duration-300"
           >
-            View Cluster Details →
+            Lihat Detail Kluster →
           </button>
         </div>
       </div>
@@ -398,7 +398,7 @@ const MOCK_DATA: AnalysisResult = {
   comments_count: 556,
   comments_cleaned_count: 525,
   temporal_insight: {
-    message: "An unusual spike in comment activity was detected within the analysis period. This pattern indicates a coordinated movement.",
+    message: "Terdeteksi lonjakan aktivitas komentar yang tidak biasa selama periode analisis. Pola ini mengindikasikan adanya gerakan terkoordinasi.",
   },
   temporal_analysis: [
     { tanggal: "3 Mei", jumlah_komentar: 0 },
@@ -409,24 +409,24 @@ const MOCK_DATA: AnalysisResult = {
   suspicious_accounts: [
     {
       username: "yafiimuhhammad",
-      risk_score: "High",
-      cluster_behavior: "Coordinated Inauthentic Behavior",
+      risk_score: "Tinggi",
+      cluster_behavior: "Perilaku Tidak Otentik yang Terkoordinasi",
       comment_count: 1,
-      pattern: "Frequency of repeates comments",
+      pattern: "Frekuensi komentar yang diulang",
     },
     {
       username: "veinsby_bosshub",
-      risk_score: "Low",
-      cluster_behavior: "Normal behaviour",
+      risk_score: "Rendah",
+      cluster_behavior: "Perilaku Normal",
       comment_count: 2,
-      pattern: "Suspicious comment pattern",
+      pattern: "Pola komentar yang mencurigakan",
     },
     {
       username: "fynol_a",
-      risk_score: "Low",
-      cluster_behavior: "Normal behaviour",
+      risk_score: "Rendah",
+      cluster_behavior: "Perilaku Normal",
       comment_count: 2,
-      pattern: "Suspicious comment pattern",
+      pattern: "Pola komentar yang mencurigakan",
     },
   ],
 cluster_summaries: [
@@ -779,7 +779,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">CIB Analysis Results</h1>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight leading-tight">Hasil Analisis CIB</h1>
               <div className="flex items-center gap-2 text-[#E7E4BE] bg-black/15 w-fit max-w-full px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg border border-white/10 overflow-hidden">
                 <LinkIcon className="w-5 h-5" />
                 <a
@@ -794,7 +794,7 @@ export default function DashboardPage() {
               </div>
               <div className="text-sm bg-white/20 w-fit px-4 py-1.5 rounded font-bold tracking-wider uppercase flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                AI Verified Analysis
+                Analisis Terverifikasi AI
               </div>
             </div>
 
@@ -804,22 +804,22 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6 flex flex-col justify-between">
             <div className="flex items-center gap-1.5 mb-4">
-              <h2 className="text-lg font-bold text-stone-900">CIB Score</h2>
+              <h2 className="text-lg font-bold text-stone-900">Skor CIB</h2>
               <span className="text-sm text-stone-400 hover:text-stone-600 cursor-help transition-colors font-medium" title="Coordinated Inauthentic Behavior Score">
                 ⓘ
               </span>
             </div>
-            <GaugeChart value={cibScore} label="Significant patterns of manipulation have been detected." />
+            <GaugeChart value={cibScore} label="Pola manipulasi yang signifikan telah terdeteksi." />
           </div>
 
           <div className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2.5">
                 <Activity className="w-5 h-5 text-[#A54141]" />
-                Temporal Comment Patterns
+                Pola Komentar Temporal
               </h2>
               <span className="text-sm px-3 py-1 bg-[#E7E4BE]/40 text-[#A54141] rounded-full border border-[#D9C49D] font-bold">
-                5 Spikes Detected
+                Terdeteksi 5 lonjakan
               </span>
             </div>
             <ResponsiveContainer width="100%" height={200}>
@@ -842,7 +842,7 @@ export default function DashboardPage() {
               <div className="mt-6 bg-[#E7E4BE]/20 border border-[#D9C49D]/60 rounded-lg p-5 flex gap-3.5">
                 <Lightbulb className="w-6 h-6 text-[#A54141] flex-shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-base font-bold text-[#A54141] mb-1">Insight Executive:</p>
+                  <p className="text-base font-bold text-[#A54141] mb-1">Insight Eksekutif:</p>
                   <p className="text-base text-stone-700 leading-relaxed font-medium">{result.temporal_insight.message}</p>
                 </div>
               </div>
@@ -854,7 +854,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6 space-y-6">
             <h2 className="text-lg font-bold text-stone-900 flex items-center gap-2.5">
               <BarChart3 className="w-5 h-5 text-[#A54141]" />
-              Breakdown Indikator
+              Rincian Indikator
             </h2>
 
     <div className="space-y-6">
@@ -862,7 +862,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex justify-between items-center mb-2.5">
             <span className="text-base font-semibold text-stone-600">
-              Semantic Similarity
+              Kesamaan Semantik
             </span>
             <span
               className={`text-xs font-bold px-2.5 py-1 rounded-full ${
@@ -874,10 +874,10 @@ export default function DashboardPage() {
               }`}
             >
               {semanticSimilarity >= 75
-                ? "Very High"
+                ? "Tinggi"
                 : semanticSimilarity >= 50
-                ? "Medium"
-                : "Very Low"}
+                ? "Sedang"
+                : "Rendah"}
             </span>
             <span className="text-base font-extrabold text-stone-900">
               {Math.round(semanticSimilarity)}%
@@ -903,7 +903,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex justify-between items-center mb-2.5">
             <span className="text-base font-semibold text-stone-600">
-              Temporal Anomaly
+              Anomali Waktu
             </span>
             <span
               className={`text-xs font-bold px-2.5 py-1 rounded-full ${
@@ -915,10 +915,10 @@ export default function DashboardPage() {
               }`}
             >
               {temporalAnomaly >= 75
-                ? "Very High"
+                ? "Tinggi"
                 : temporalAnomaly >= 50
-                ? "Medium"
-                : "Very Low"}
+                ? "Sedang"
+                : "Rendah"}
             </span>
             <span className="text-base font-extrabold text-stone-900">
               {Math.round(temporalAnomaly)}%
@@ -944,7 +944,7 @@ export default function DashboardPage() {
         <div>
           <div className="flex justify-between items-center mb-2.5">
             <span className="text-base font-semibold text-stone-600">
-              Behavioral Coordination
+              Koordinasi Perilaku
             </span>
             <span
               className={`text-xs font-bold px-2.5 py-1 rounded-full ${
@@ -956,10 +956,10 @@ export default function DashboardPage() {
               }`}
             >
               {behavioralCoordination >= 75
-                ? "Very High"
+                ? "Tinggi"
                 : behavioralCoordination >= 50
-                ? "Medium"
-                : "Very Low"}
+                ? "Sedang"
+                : "Rendah"}
             </span>
             <span className="text-base font-extrabold text-stone-900">
               {Math.round(behavioralCoordination)}%
@@ -988,7 +988,7 @@ export default function DashboardPage() {
           <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
             <h2 className="text-lg font-bold text-stone-900 mb-4 flex items-center gap-2.5">
               <Network className="w-5 h-5 text-[#A54141]" />
-              Coordinated Clusters
+              Kelompok Terkoordinasi
             </h2>
 
             <NetworkGraph
@@ -1001,19 +1001,19 @@ export default function DashboardPage() {
           </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatsCard icon={<MessageCircle className="w-6 h-6 text-[#A54141]" />} label="Total Comments" value={(result?.comments_count || 0).toString()} />
-          <StatsCard icon={<Clock className="w-6 h-6 text-[#A54141]" />} label="Cleaned Comments" value={(result?.comments_cleaned_count || 0).toString()} />
-          <StatsCard icon={<Network className="w-6 h-6 text-[#A54141]" />} label="Number of Clusters" value={(result?.cluster_summaries?.length || 0).toString()} />
-          <StatsCard icon={<AlertTriangle className="w-6 h-6 text-[#A54141]" />} label="Spam Detected" value={spamClusters.toString()} />
+          <StatsCard icon={<MessageCircle className="w-6 h-6 text-[#A54141]" />} label="Total Komentar" value={(result?.comments_count || 0).toString()} />
+          <StatsCard icon={<Clock className="w-6 h-6 text-[#A54141]" />} label="Komentar yang Dibersihkan" value={(result?.comments_cleaned_count || 0).toString()} />
+          <StatsCard icon={<Network className="w-6 h-6 text-[#A54141]" />} label="Jumlah Kelompok" value={(result?.cluster_summaries?.length || 0).toString()} />
+          <StatsCard icon={<AlertTriangle className="w-6 h-6 text-[#A54141]" />} label="Spam Terdeteksi" value={spamClusters.toString()} />
         </div>
 
           <div className="bg-white rounded-xl shadow-sm border border-[#D9C49D]/60 p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div>
                 <h2 className="text-xl font-bold text-stone-900 flex items-center gap-2.5">
-                  List of Suspicious Accounts
+                 Daftar Akun Mencurigakan
                   <span className="text-sm px-3 py-1 bg-[#A54141]/10 text-[#A54141] rounded-full font-bold">
-                    {result.suspicious_accounts.length} account
+                    {result.suspicious_accounts.length} akun
                   </span>
                 </h2>
               </div>
@@ -1022,7 +1022,7 @@ export default function DashboardPage() {
                   <Search className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
                   <input
                     type="text"
-                    placeholder="Search for username..."
+                    placeholder="Cari nama pengguna..."
                     value={accountSearch}
                     onChange={(e) => setAccountSearch(e.target.value)}
                     className="pl-10 pr-4 py-2.5 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none focus:ring-1 focus:ring-[#A54141]"
@@ -1033,10 +1033,10 @@ export default function DashboardPage() {
                   onChange={(e) => setAccountFilter(e.target.value)}
                   className="px-4 py-2.5 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none text-stone-600 focus:ring-1 focus:ring-[#A54141] font-medium"
                 >
-                  <option value="all">All Levels</option>
-                  <option value="High">High</option>
-                  <option value="Medium">Medium</option>
-                  <option value="Low">Low</option>
+                  <option value="all">Semua Tingkat</option>
+                  <option value="Tinggi">Tinggi</option>
+                  <option value="Sedang">Sedang</option>
+                  <option value="Rendah">Rendah</option>
                 </select>
               </div>
             </div>
@@ -1045,9 +1045,9 @@ export default function DashboardPage() {
               <table className="w-full text-left text-base border-collapse">
                 <thead className="bg-stone-50 text-stone-600 font-bold border-b border-stone-200 uppercase tracking-wider text-sm">
                   <tr>
-                    <th className="py-5 px-4">Username</th>
-                    <th className="py-5 px-4">Risk Score</th>
-                    <th className="py-5 px-4">Cluster Behavior</th>
+                    <th className="py-5 px-4">Pengguna</th>
+                    <th className="py-5 px-4">Skor Risk</th>
+                    <th className="py-5 px-4">Perilaku Cluster</th>
                     <th className="py-5 px-4 text-center">Komentar</th>
                     <th className="py-5 px-4">Pattern Terdeteksi</th>
                   </tr>
@@ -1066,9 +1066,9 @@ export default function DashboardPage() {
                         <td className="py-5 px-4">
                           <span
                             className={`text-xs px-3 py-1 rounded-md font-extrabold ${
-                              account.risk_score === "High"
+                              account.risk_score === "Tinggi"
                                 ? "bg-[#A54141]/10 text-[#A54141]"
-                                : account.risk_score === "Medium"
+                                : account.risk_score === "Sedang"
                                 ? "bg-[#C4876B]/10 text-[#C4876B]"
                                 : "bg-stone-100 text-stone-600"
                             }`}
@@ -1102,7 +1102,7 @@ export default function DashboardPage() {
                         colSpan={5}
                         className="py-10 text-center text-stone-400 font-semibold"
                       >
-                        No data found
+                        Tidak menemukan data
                       </td>
                     </tr>
                   )}
@@ -1122,9 +1122,9 @@ export default function DashboardPage() {
               onChange={(e) => setFilterLabel(e.target.value)}
               className="px-4 py-2 border border-stone-200 rounded-lg text-base bg-stone-50 focus:outline-none focus:ring-1 focus:ring-[#A54141] font-medium"
             >
-              <option value="all">All categories</option>
+              <option value="all">Semua Kategori</option>
               <option value="spam">Spam</option>
-              <option value="suspicious">Suspicious</option>
+              <option value="suspicious">Mencurigakan</option>
               <option value="normal">Normal</option>
             </select>
           </div>
@@ -1194,7 +1194,7 @@ function ClusterCard({
 
               <span className="text-base text-stone-400 font-semibold flex items-center gap-2">
                 <Users className="w-5 h-5" />
-                {cluster.stats.jumlah_data} comment
+                {cluster.stats.jumlah_data} komentar
               </span>
             </div>
 
@@ -1206,7 +1206,7 @@ function ClusterCard({
 
             <div>
               <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
-                Spam Score
+                Skor Spam 
               </div>
               <div className="text-base font-extrabold text-stone-800">
                 {(cluster.stats.spam_score * 100).toFixed(1)}%
@@ -1215,7 +1215,7 @@ function ClusterCard({
 
             <div>
               <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
-                Unique Ratio
+                Rasio Unik
               </div>
               <div className="text-base font-extrabold text-stone-800">
                 {(cluster.stats.unique_ratio * 100).toFixed(1)}%
@@ -1224,7 +1224,7 @@ function ClusterCard({
 
             <div>
               <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
-                Repetition
+                Pengulangan
               </div>
               <div className="text-base font-extrabold text-stone-800">
                 {cluster.stats.repetition_score.toFixed(1)}
@@ -1233,7 +1233,7 @@ function ClusterCard({
 
             <div>
               <div className="text-xs text-stone-400 uppercase font-bold tracking-wide">
-                Avg length
+                Rata-rata Panjang
               </div>
               <div className="text-base font-extrabold text-stone-800">
                 {cluster.stats.avg_comment_length}

@@ -766,7 +766,114 @@ const paginatedAccounts = filteredAccounts.slice(
     : allClusterData.slice(0, 5);
 
   const handleDownloadCSV = () => {
-    console.log("Downloading CSV file...");
+    if (!result) return;
+
+    const csvRows: string[] = [];
+
+    // Helper to escape values for CSV
+    const escape = (val: unknown) => {
+      if (val === undefined || val === null) return "";
+      const str = String(val);
+      if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+        return `"${str.replace(/"/g, '""')}"`;
+      }
+      return str;
+    };
+
+    // 1. Metadata Section
+    csvRows.push("=== INFORMASI POST ===");
+    csvRows.push(`Post ID,${escape(result.post_id)}`);
+    csvRows.push(`URL,${escape(result.url)}`);
+    csvRows.push(`Skor CIB,${escape(result.cib_score)}%`);
+    csvRows.push(`Kesamaan Semantik,${escape(Math.round(result.semantic_similarity * 100))}%`);
+    csvRows.push(`Anomali Waktu,${escape(Math.round(result.temporal_anomaly * 100))}%`);
+    csvRows.push(`Total Komentar,${escape(result.comments_count)}`);
+    csvRows.push(`Komentar Bersih,${escape(result.comments_cleaned_count)}`);
+    if (result.temporal_insight) {
+      csvRows.push(`Insight Eksekutif,${escape(result.temporal_insight.message)}`);
+    }
+    csvRows.push(""); // empty row spacing
+
+    // 2. Cluster Summaries Section
+    csvRows.push("=== RINGKASAN KLUSTER ===");
+    csvRows.push([
+      "Cluster ID",
+      "Kategori",
+      "Jumlah Komentar",
+      "Spam Score",
+      "Rasio Unik",
+      "Skor Pengulangan",
+      "Rata-rata Panjang",
+      "Ringkasan"
+    ].join(","));
+
+    result.cluster_summaries.forEach((cluster) => {
+      csvRows.push([
+        escape(cluster.cluster_id),
+        escape(cluster.spam_label.toUpperCase()),
+        escape(cluster.stats.jumlah_data),
+        escape((cluster.stats.spam_score * 100).toFixed(1) + "%"),
+        escape((cluster.stats.unique_ratio * 100).toFixed(1) + "%"),
+        escape(cluster.stats.repetition_score.toFixed(2)),
+        escape(cluster.stats.avg_comment_length),
+        escape(cluster.summary)
+      ].join(","));
+    });
+    csvRows.push(""); // empty row spacing
+
+    // 3. Suspicious Accounts Section
+    csvRows.push("=== AKUN MENCURIGAKAN ===");
+    csvRows.push([
+      "Username",
+      "Risk Score",
+      "Perilaku Cluster",
+      "Jumlah Komentar",
+      "Pola Terdeteksi"
+    ].join(","));
+
+    result.suspicious_accounts.forEach((account) => {
+      csvRows.push([
+        escape(account.username),
+        escape(account.risk_score),
+        escape(account.cluster_behavior),
+        escape(account.comment_count),
+        escape(account.pattern)
+      ].join(","));
+    });
+    csvRows.push(""); // empty row spacing
+
+    // 4. All Comments List
+    csvRows.push("=== DETAIL KOMENTAR KLUSTER ===");
+    csvRows.push([
+      "Cluster ID",
+      "Kategori",
+      "Username",
+      "Waktu",
+      "Komentar"
+    ].join(","));
+
+    result.cluster_summaries.forEach((cluster) => {
+      cluster.comments.forEach((comment) => {
+        csvRows.push([
+          escape(cluster.cluster_id),
+          escape(cluster.spam_label.toUpperCase()),
+          escape(comment.username),
+          escape(comment.tanggal),
+          escape(comment.komentar)
+        ].join(","));
+      });
+    });
+
+    const csvContent = csvRows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `cib-analysis-${result.post_id || "export"}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
